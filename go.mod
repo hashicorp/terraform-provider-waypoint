@@ -1,4 +1,4 @@
-module github.com/hashicorp-dev-advocates/terraform-provider-waypoint
+module github.com/hashicorp/terraform-provider-waypoint
 
 go 1.18
 

@@ -1,6 +1,6 @@
 name = waypoint
-organization = hashicorp-dev-advocates
-version = 0.3.0
+organization = hashicorp
+version = 0.1.0
 arch = darwin_amd64
 #arch = linux_amd64
 

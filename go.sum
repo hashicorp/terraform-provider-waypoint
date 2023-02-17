@@ -108,8 +108,6 @@ github.com/google/uuid v1.1.2/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+
 github.com/google/uuid v1.3.0 h1:t6JiXgmwXMjEs8VusXIJk2BXHsn+wx8BZdTaoZ5fu7I=
 github.com/google/uuid v1.3.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/grpc-ecosystem/grpc-gateway v1.16.0/go.mod h1:BDjrQk3hbvj6Nolgz8mAMFbcEtjT1g+wF4CSlocrBnw=
-github.com/hashicorp-dev-advocates/waypoint-client v0.0.0-20220614092443-25f9a4b17102 h1:x/NFvmfvd6C3jmP+TZZSIj+q7qoQwsCB8BedAN3I4Uc=
-github.com/hashicorp-dev-advocates/waypoint-client v0.0.0-20220614092443-25f9a4b17102/go.mod h1:/QkDX/lb3sB0s0hntPZ3FhRQNKUirf+P06T5+1E5SUQ=
 github.com/hashicorp-dev-advocates/waypoint-client v0.0.0-20220802125513-67b8c0d351a1 h1:yNXkZ4UvmwynWz8vCIOSMgRYH26cMDbTrhGxZGoraO4=
 github.com/hashicorp-dev-advocates/waypoint-client v0.0.0-20220802125513-67b8c0d351a1/go.mod h1:qlyjd0nuybV9Tf2PTksCAK6B78OP6icQ2d3H38/kiJU=
 github.com/hashicorp/errwrap v1.0.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=

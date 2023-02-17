@@ -3,8 +3,8 @@ package main
 import (
 	"flag"
 
-	waypoint "github.com/hashicorp-dev-advocates/terraform-provider-waypoint/internal/provider"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
+	waypoint "github.com/hashicorp/terraform-provider-waypoint/internal/provider"
 )
 
 // Run "go generate" to format example terraform files and generate the docs for the registry/website
