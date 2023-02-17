@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+
 	waypoint "github.com/hashicorp-dev-advocates/terraform-provider-waypoint/internal/provider"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
 )
@@ -35,7 +36,7 @@ func main() {
 		Debug: debugMode,
 
 		// TODO: update this string with the full name of your provider as used in your configs
-		ProviderAddr: "registry.terraform.io/hashicorp-dev-advocates/waypoint",
+		ProviderAddr: "registry.terraform.io/hashicorp/waypoint",
 
 		ProviderFunc: waypoint.Provider,
 	}
