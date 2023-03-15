@@ -2,13 +2,17 @@ module github.com/hashicorp/terraform-provider-waypoint
 
 go 1.18
 
+// used for local development things
+// replace github.com/hashicorp-dev-advocates/waypoint-client => ../../hashicorp-dev-advocates/waypoint-client
+
 require (
-	github.com/hashicorp-dev-advocates/waypoint-client v0.0.0-20220802125513-67b8c0d351a1
+	github.com/hashicorp-dev-advocates/waypoint-client v0.0.0-20230315220206-f3f6e4712049
 	github.com/hashicorp/terraform-plugin-docs v0.10.1
 	github.com/hashicorp/terraform-plugin-framework v1.1.1
 	github.com/hashicorp/terraform-plugin-framework-validators v0.10.0
 	github.com/hashicorp/terraform-plugin-log v0.7.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.17.0
+	google.golang.org/grpc v1.51.0
 )
 
 require (
@@ -73,6 +77,5 @@ require (
 	golang.org/x/text v0.4.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20221201164419-0e50fba7f41c // indirect
-	google.golang.org/grpc v1.51.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 )
