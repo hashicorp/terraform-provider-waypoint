@@ -11,6 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	waypointClient "github.com/hashicorp-dev-advocates/waypoint-client/pkg/client"
 	gen "github.com/hashicorp-dev-advocates/waypoint-client/pkg/waypoint"
@@ -221,6 +223,16 @@ func (r *projectResource) Read(ctx context.Context, req resource.ReadRequest, re
 	// Get refreshed order value from HashiCups
 	project, err := r.client.GetProject(ctx, state.Name.ValueString())
 	if err != nil {
+		// q.Q("read error:", err.Error())
+		if status.Code(err) == codes.NotFound {
+			// resp.Diagnostics.AddWarning(
+			// 	"Error Reading Project",
+			// 	"Could not read Project with name "+state.Name.ValueString()+": "+err.Error(),
+			// )
+			resp.State.RemoveResource(ctx)
+			return
+		}
+
 		resp.Diagnostics.AddError(
 			"Error Reading Project",
 			"Could not read Project with name "+state.Name.ValueString()+": "+err.Error(),
@@ -280,6 +292,23 @@ func (r *projectResource) Read(ctx context.Context, req resource.ReadRequest, re
 
 // Delete deletes the resource and removes the Terraform state on success.
 func (r *projectResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	// Retrieve values from state
+	var state projectResourceModel
+	diags := req.State.Get(ctx, &state)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Delete existing order
+	err := r.client.DestroyProject(ctx, state.Name.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error Deleting Waypoint Project",
+			"Could not delete project, unexpected error: "+err.Error(),
+		)
+		return
+	}
 }
 
 // Metadata returns the resource type name.
@@ -320,63 +349,40 @@ func (r *projectResource) upsert(ctx context.Context, plan projectResourceModel)
 	projectConf := waypointClient.DefaultProjectConfig()
 
 	// // Git configuration for Waypoint project
-	var gitConfig *waypointClient.Git
+	gitConfig := waypointClient.Git{
+		Url:                      plan.DataSourceGit.Url.ValueString(),
+		Path:                     plan.DataSourceGit.Path.ValueString(),
+		IgnoreChangesOutsidePath: plan.DataSourceGit.IgnoreChangesOutsidePath.ValueBool(),
+		Ref:                      plan.DataSourceGit.Ref.ValueString(),
+	}
 
 	// if len(authBasicList) > 0 {
 	if plan.GitAuthBasic != nil {
 		// q.Q("found git auth basic")
-		// var auth *client.GitAuthBasic
-
-		// authBasicSlice := authBasicList[0].(map[string]interface{})
-		// username := authBasicSlice["username"]
-		// password := authBasicSlice["password"]
-
-		// auth = &client.GitAuthBasic{
-		// 	Username: username.(string),
-		// 	Password: password.(string),
-		// }
-
-		// gitConfig = &client.Git{
-		// 	Url:                      dataSourceSlice["git_url"].(string),
-		// 	Path:                     dataSourceSlice["git_path"].(string),
-		// 	IgnoreChangesOutsidePath: dataSourceSlice["ignore_changes_outside_path"].(bool),
-		// 	Ref:                      dataSourceSlice["git_ref"].(string),
-		// 	Auth:                     auth,
-		// }
+		auth := &waypointClient.GitAuthBasic{
+			Username: plan.GitAuthBasic.Username.ValueString(),
+			Password: plan.GitAuthBasic.Password.ValueString(),
+		}
+		gitConfig.Auth = auth
 	} else if plan.GitAuthSSH != nil {
 		// q.Q("found git auth ssh")
-		// 	var auth *client.GitAuthSsh
-		// 	authSshSlice := authSshList[0].(map[string]interface{})
-		// 	var passphrase interface{}
-		// 	gitUser := authSshSlice["git_user"]
-		// 	sshPrivateKey := authSshSlice["ssh_private_key"]
-		// 	if authSshSlice["passphrase"] != nil {
-		// 		passphrase = authSshSlice["passphrase"]
-		// 	}
+		gitUser := plan.GitAuthSSH.User.ValueString()
+		sshPrivateKey := plan.GitAuthSSH.PrivateKey.ValueString()
+		var passphrase string
+		if !plan.GitAuthSSH.Passphrase.IsNull() {
+			passphrase = plan.GitAuthSSH.Passphrase.ValueString()
+		}
 
-		// 	auth = &client.GitAuthSsh{
-		// 		User:          gitUser.(string),
-		// 		PrivateKeyPem: []byte(sshPrivateKey.(string)),
-		// 		Password:      passphrase.(string),
-		// 	}
-
-		// 	gitConfig = &client.Git{
-		// 		Url:                      dataSourceSlice["git_url"].(string),
-		// 		Path:                     dataSourceSlice["git_path"].(string),
-		// 		IgnoreChangesOutsidePath: dataSourceSlice["ignore_changes_outside_path"].(bool),
-		// 		Ref:                      dataSourceSlice["git_ref"].(string),
-		// 		Auth:                     auth,
-		// 	}
+		auth := &waypointClient.GitAuthSsh{
+			User:          gitUser,
+			PrivateKeyPem: []byte(sshPrivateKey),
+			Password:      passphrase,
+		}
+		gitConfig.Auth = auth
 
 	} else {
 		// q.Q("found basic git stuff")
-		gitConfig = &waypointClient.Git{
-			Url:                      plan.DataSourceGit.Url.ValueString(),
-			Path:                     plan.DataSourceGit.Path.ValueString(),
-			IgnoreChangesOutsidePath: plan.DataSourceGit.IgnoreChangesOutsidePath.ValueBool(),
-			Ref:                      plan.DataSourceGit.Ref.ValueString(),
-			Auth:                     nil,
-		}
+		gitConfig.Auth = nil
 	}
 
 	// // Project variables configuration
@@ -405,6 +411,6 @@ func (r *projectResource) upsert(ctx context.Context, plan projectResourceModel)
 	// q.Q("git config:", gitConfig)
 	// q.Q("variableList:", variableList)
 
-	_, err := r.client.UpsertProject(ctx, projectConf, gitConfig, variableList)
+	_, err := r.client.UpsertProject(ctx, projectConf, &gitConfig, variableList)
 	return plan, err
 }
