@@ -8,9 +8,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/hashicorp/terraform-provider-waypoint/internal/defaults"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -34,7 +36,8 @@ type projectResource struct {
 
 // projectResourceModel maps the resource schema data.
 type projectResourceModel struct {
-	Name                 types.String      `tfsdk:"project_name"`
+	Name types.String `tfsdk:"project_name"`
+	// TODO: upgrade to support sensitive
 	Variables            map[string]string `tfsdk:"project_variables"`
 	RemoteRunnersEnabled types.Bool        `tfsdk:"remote_runners_enabled"`
 	AppStatusPollSeconds types.Int64       `tfsdk:"app_status_poll_seconds"`
@@ -106,7 +109,11 @@ func (r *projectResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 						Description: "Git repository ref containing waypoint.hcl file",
 					},
 					"ignore_changes_outside_path": &schema.BoolAttribute{
-						Optional:    true,
+						Optional: true,
+						Computed: true,
+						PlanModifiers: []planmodifier.Bool{
+							defaults.BoolDefaultValue(types.BoolValue(false)),
+						},
 						Description: "Whether Waypoint ignores changes outside path storing waypoint.hcl file",
 					},
 					"git_poll_interval_seconds": &schema.Int64Attribute{
@@ -205,13 +212,6 @@ func (r *projectResource) Create(ctx context.Context, req resource.CreateRequest
 
 // Read refreshes the Terraform state with the latest data.
 func (r *projectResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	// 	client := m.(*WaypointClient).conn
-
-	// 	projectName := d.Get("project_name").(string)
-	// 	project, err := client.GetProject(context.TODO(), projectName)
-	// 	if err != nil {
-	// 		return diag.Errorf("Error retrieving the %s project", projectName)
-	// 	}
 	// Get current state
 	var state projectResourceModel
 	diags := req.State.Get(ctx, &state)
@@ -223,7 +223,6 @@ func (r *projectResource) Read(ctx context.Context, req resource.ReadRequest, re
 	// Get refreshed order value from HashiCups
 	project, err := r.client.GetProject(ctx, state.Name.ValueString())
 	if err != nil {
-		// q.Q("read error:", err.Error())
 		if status.Code(err) == codes.NotFound {
 			// resp.Diagnostics.AddWarning(
 			// 	"Error Reading Project",
@@ -240,46 +239,66 @@ func (r *projectResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
-	// 	d.Set("remote_runners_enabled", project.RemoteEnabled)
 	state.RemoteRunnersEnabled = types.BoolValue(project.RemoteEnabled)
+	// for _, v := range project.Variables {
+	// }
 
+	// TODO: Computed list?
 	// 	applications := flattenApplications(project.Applications)
 	// 	d.Set("applications", applications)
 
 	// 	variables := flattenVariables(project.Variables)
 	// 	d.Set("project_variables", variables)
 
-	// 	dataSourceGitSlice := map[string]interface{}{}
-	// 	dataSourceGitSlice["git_url"] = project.DataSource.GetGit().Url
-	// 	dataSourceGitSlice["git_path"] = project.DataSource.GetGit().Path
-	// 	dataSourceGitSlice["git_ref"] = project.DataSource.GetGit().Ref
-	// 	dataSourceGitSlice["file_change_signal"] = project.FileChangeSignal
+	// q.Q("data source:", project.DataSource)
+	// TODO: This should be a &gen.Job_DataSource_Git from the protos. Not yet
+	// sure what to do here if it's a _Local or _Remote version of that
+	// dataSource := project.DataSource.Source
+	var dsg *dataSourceGitModel
+	var gab *gitAuthBasicModel
+	var gas *gitAuthSSHModel
+	if project.DataSource != nil {
+		// 	gitAuth := project.DataSource.Source.(*gen.Job_DataSource_Git).Git.Auth
+		switch project.DataSource.Source.(type) {
+		case *gen.Job_DataSource_Local, *gen.Job_DataSource_Remote:
+		// not sure what to do here
+		default:
+			// assumes *gen.Job_DataSource_Git
+			src := project.DataSource.Source.(*gen.Job_DataSource_Git)
+			pollRaw, _ := time.ParseDuration(project.DataSourcePoll.Interval)
+			poll := pollRaw / time.Second
+			dsg = &dataSourceGitModel{
+				Url:                      types.StringValue(src.Git.Url),
+				Ref:                      types.StringValue(src.Git.Ref),
+				Path:                     types.StringValue(src.Git.Path),
+				IgnoreChangesOutsidePath: types.BoolValue(src.Git.IgnoreChangesOutsidePath),
+				PollInterval:             types.Int64Value(int64(poll)),
+				FileChangeSignal:         types.StringValue(project.FileChangeSignal),
+			}
 
-	// 	dpi, _ := time.ParseDuration(project.DataSourcePoll.Interval)
-	// 	dataSourceGitSlice["git_poll_interval_seconds"] = dpi / time.Second
-	// 	d.Set("data_source_git", []interface{}{dataSourceGitSlice})
+			authRaw := src.Git.Auth
+			switch gitAuth := authRaw.(type) {
+			case *gen.Job_Git_Basic_:
+				gab = &gitAuthBasicModel{}
+				gab.Username = types.StringValue(gitAuth.Basic.Username)
+				gab.Password = types.StringValue(gitAuth.Basic.Password)
+			case *gen.Job_Git_Ssh:
+				gas = &gitAuthSSHModel{}
+				gas.User = types.StringValue(gitAuth.Ssh.User)
+				gas.Passphrase = types.StringValue(gitAuth.Ssh.Password)
+				gas.PrivateKey = types.StringValue(string(gitAuth.Ssh.PrivateKeyPem))
+			}
+		}
+	}
+	state.DataSourceGit = dsg
+	state.GitAuthBasic = gab
+	state.GitAuthSSH = gas
 
-	// 	gitAuthBasicSlice := map[string]interface{}{}
-	// 	gitAuthSshSlice := map[string]interface{}{}
-
-	// 	gitAuth := project.DataSource.Source.(*gen.Job_DataSource_Git).Git.Auth
-	// 	switch gitAuth.(type) {
-	// 	case *gen.Job_Git_Basic_:
-	// 		gitAuthBasicSlice["username"] = gitAuth.(*gen.Job_Git_Basic_).Basic.Username
-	// 		gitAuthBasicSlice["password"] = gitAuth.(*gen.Job_Git_Basic_).Basic.Password
-	// 		d.Set("git_auth_basic", []interface{}{gitAuthBasicSlice})
-	// 	case *gen.Job_Git_Ssh:
-	// 		gitAuthSshSlice["git_user"] = gitAuth.(*gen.Job_Git_Ssh).Ssh.User
-	// 		gitAuthSshSlice["passphrase"] = gitAuth.(*gen.Job_Git_Ssh).Ssh.Password
-	// 		gitAuthSshSlice["ssh_private_key"] = string(gitAuth.(*gen.Job_Git_Ssh).Ssh.PrivateKeyPem)
-	// 		d.Set("git_auth_ssh", []interface{}{gitAuthSshSlice})
-	// 	}
-
-	// 	if project.StatusReportPoll != nil {
-	// 		asps := project.StatusReportPoll.Interval
-	// 		aspsParse, _ := time.ParseDuration(asps)
-	// 		d.Set("app_status_poll_seconds", aspsParse/time.Second)
-	// 	}
+	if project.StatusReportPoll != nil {
+		pollRaw, _ := time.ParseDuration(project.StatusReportPoll.Interval)
+		poll := pollRaw / time.Second
+		state.AppStatusPollSeconds = types.Int64Value(int64(poll))
+	}
 
 	// return nil
 	// Set refreshed state
@@ -358,14 +377,12 @@ func (r *projectResource) upsert(ctx context.Context, plan projectResourceModel)
 
 	// if len(authBasicList) > 0 {
 	if plan.GitAuthBasic != nil {
-		// q.Q("found git auth basic")
 		auth := &waypointClient.GitAuthBasic{
 			Username: plan.GitAuthBasic.Username.ValueString(),
 			Password: plan.GitAuthBasic.Password.ValueString(),
 		}
 		gitConfig.Auth = auth
 	} else if plan.GitAuthSSH != nil {
-		// q.Q("found git auth ssh")
 		gitUser := plan.GitAuthSSH.User.ValueString()
 		sshPrivateKey := plan.GitAuthSSH.PrivateKey.ValueString()
 		var passphrase string
@@ -381,7 +398,6 @@ func (r *projectResource) upsert(ctx context.Context, plan projectResourceModel)
 		gitConfig.Auth = auth
 
 	} else {
-		// q.Q("found basic git stuff")
 		gitConfig.Auth = nil
 	}
 
@@ -406,11 +422,6 @@ func (r *projectResource) upsert(ctx context.Context, plan projectResourceModel)
 	projectConf.GitPollInterval = time.Duration(plan.DataSourceGit.PollInterval.ValueInt64()) * time.Second
 
 	projectConf.FileChangeSignal = plan.DataSourceGit.FileChangeSignal.ValueString()
-
-	// q.Q("project:", projectConf)
-	// q.Q("git config:", gitConfig)
-	// q.Q("variableList:", variableList)
-
 	_, err := r.client.UpsertProject(ctx, projectConf, &gitConfig, variableList)
 	return plan, err
 }
