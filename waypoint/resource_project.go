@@ -38,13 +38,20 @@ type projectResource struct {
 type projectResourceModel struct {
 	Name types.String `tfsdk:"project_name"`
 	// TODO: upgrade to support sensitive
-	Variables            map[string]string `tfsdk:"project_variables"`
+	Variables            []*variablesModel `tfsdk:"project_variables"`
 	RemoteRunnersEnabled types.Bool        `tfsdk:"remote_runners_enabled"`
 	AppStatusPollSeconds types.Int64       `tfsdk:"app_status_poll_seconds"`
 
 	DataSourceGit *dataSourceGitModel `tfsdk:"data_source_git"`
 	GitAuthBasic  *gitAuthBasicModel  `tfsdk:"git_auth_basic"`
 	GitAuthSSH    *gitAuthSSHModel    `tfsdk:"git_auth_ssh"`
+}
+
+// variablesModel maps data source data
+type variablesModel struct {
+	Name      types.String `tfsdk:"name"`
+	Value     types.String `tfsdk:"value"`
+	Sensitive types.Bool   `tfsdk:"sensitive"`
 }
 
 // dataSourceGitModel maps data source data
@@ -87,10 +94,20 @@ func (r *projectResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				Required:    true,
 				Description: "The name of the Waypoint project",
 			},
-			"project_variables": schema.MapAttribute{
+			"project_variables": schema.ListNestedAttribute{
 				Optional:    true,
 				Description: "List of variables in Key/value pairs associated with the Waypoint Project",
-				ElementType: types.StringType,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"name": schema.StringAttribute{
+							Required: true},
+						"value": schema.StringAttribute{
+							Required: true},
+						"sensitive": schema.BoolAttribute{
+							Optional: true,
+						},
+					},
+				},
 			},
 			"data_source_git": &schema.SingleNestedAttribute{
 				Required:    true,
@@ -240,17 +257,19 @@ func (r *projectResource) Read(ctx context.Context, req resource.ReadRequest, re
 	}
 
 	state.RemoteRunnersEnabled = types.BoolValue(project.RemoteEnabled)
-	// for _, v := range project.Variables {
-	// }
 
-	// TODO: Computed list?
-	// 	applications := flattenApplications(project.Applications)
-	// 	d.Set("applications", applications)
+	var projectVariables []*variablesModel
+	for _, v := range project.Variables {
+		pvar := variablesModel{}
+		pvar.Name = types.StringValue(v.Name)
+		// we only support string values(?)
+		str := v.Value.(*gen.Variable_Str).Str
+		pvar.Value = types.StringValue(str)
+		pvar.Sensitive = types.BoolValue(v.Sensitive)
+		projectVariables = append(projectVariables, &pvar)
+	}
+	state.Variables = projectVariables
 
-	// 	variables := flattenVariables(project.Variables)
-	// 	d.Set("project_variables", variables)
-
-	// q.Q("data source:", project.DataSource)
 	// TODO: This should be a &gen.Job_DataSource_Git from the protos. Not yet
 	// sure what to do here if it's a _Local or _Remote version of that
 	// dataSource := project.DataSource.Source
@@ -258,7 +277,6 @@ func (r *projectResource) Read(ctx context.Context, req resource.ReadRequest, re
 	var gab *gitAuthBasicModel
 	var gas *gitAuthSSHModel
 	if project.DataSource != nil {
-		// 	gitAuth := project.DataSource.Source.(*gen.Job_DataSource_Git).Git.Auth
 		switch project.DataSource.Source.(type) {
 		case *gen.Job_DataSource_Local, *gen.Job_DataSource_Remote:
 		// not sure what to do here
@@ -300,7 +318,6 @@ func (r *projectResource) Read(ctx context.Context, req resource.ReadRequest, re
 		state.AppStatusPollSeconds = types.Int64Value(int64(poll))
 	}
 
-	// return nil
 	// Set refreshed state
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -403,12 +420,12 @@ func (r *projectResource) upsert(ctx context.Context, plan projectResourceModel)
 
 	// // Project variables configuration
 	var variableList []*gen.Variable
-	// varsList := d.Get("project_variables").(map[string]interface{})
 
-	for key, value := range plan.Variables {
+	for _, variable := range plan.Variables {
 		projectVariable := waypointClient.SetVariable()
-		projectVariable.Name = key
-		projectVariable.Value = &gen.Variable_Str{Str: value}
+		projectVariable.Name = variable.Name.ValueString()
+		projectVariable.Value = &gen.Variable_Str{Str: variable.Value.ValueString()}
+		projectVariable.Sensitive = variable.Sensitive.ValueBool()
 		variableList = append(variableList, &projectVariable)
 	}
 
