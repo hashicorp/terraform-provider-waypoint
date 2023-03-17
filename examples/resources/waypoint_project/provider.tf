@@ -9,7 +9,7 @@ terraform {
 
 provider "waypoint" {
   host  = "localhost:9701"
-  token = "BCkP8cw7qjs4cC1Lc58KeXeLmaak4qDUUYrTs4f2R4yocugY6dymbiNhwE1SNnh4F8EFrVWY3pbk31nbmEszhyUGkG9HXViEwWMbzzd7TbSsV2RNNzhSfC6wCfnbfJQxmaugvW6HvNjHUMP2G"
+  token = ""
 }
 
 resource "waypoint_project" "example" {
@@ -28,36 +28,23 @@ resource "waypoint_project" "example" {
 
   app_status_poll_seconds = 12
 
-  # project_variables = {
-  #   name       = "devopsrob"
-  #   job        = "dev-advocate"
-  #   conference = "HashiConf EU 2022"
-  # }
   project_variables = [
     {
-      name  = "name"
-      value = "devopsrob"
-      # finalValue= null,
+      name      = "name"
+      value     = "devopsrob"
       sensitive = true
     },
     {
-      name  = "job"
-      value = "dev-advocate"
-      # finalValue= null,
+      name      = "job"
+      value     = "dev-advocate"
       sensitive = false
     },
     {
-      name  = "conference"
-      value = "HashiConf EU 2022"
-      # finalValue= null,
+      name      = "conference"
+      value     = "HashiConf EU 2022"
       sensitive = false
     },
   ]
-  # git_auth_ssh = {
-  #   git_user        = "catsby"
-  #   passphrase      = "test"
-  #   ssh_private_key = file("~/.ssh/test-key.pem")
-  # }
 
   git_auth_basic = {
     username = "catsby"
