@@ -36,8 +36,7 @@ type projectResource struct {
 
 // projectResourceModel maps the resource schema data.
 type projectResourceModel struct {
-	Name types.String `tfsdk:"project_name"`
-	// TODO: upgrade to support sensitive
+	Name                 types.String      `tfsdk:"project_name"`
 	Variables            []*variablesModel `tfsdk:"project_variables"`
 	RemoteRunnersEnabled types.Bool        `tfsdk:"remote_runners_enabled"`
 	AppStatusPollSeconds types.Int64       `tfsdk:"app_status_poll_seconds"`
@@ -47,14 +46,14 @@ type projectResourceModel struct {
 	GitAuthSSH    *gitAuthSSHModel    `tfsdk:"git_auth_ssh"`
 }
 
-// variablesModel maps data source data
+// variablesModel map variables
 type variablesModel struct {
 	Name      types.String `tfsdk:"name"`
 	Value     types.String `tfsdk:"value"`
 	Sensitive types.Bool   `tfsdk:"sensitive"`
 }
 
-// dataSourceGitModel maps data source data
+// dataSourceGitModel map git information
 type dataSourceGitModel struct {
 	Url                      types.String `tfsdk:"git_url"`
 	Path                     types.String `tfsdk:"git_path"`
@@ -237,14 +236,14 @@ func (r *projectResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
+	projectName := state.Name.ValueString()
+	ctx = tflog.SetField(ctx, "waypoint_project", projectName)
+
 	// Get refreshed order value from HashiCups
-	project, err := r.client.GetProject(ctx, state.Name.ValueString())
+	project, err := r.client.GetProject(ctx, projectName)
 	if err != nil {
 		if status.Code(err) == codes.NotFound {
-			// resp.Diagnostics.AddWarning(
-			// 	"Error Reading Project",
-			// 	"Could not read Project with name "+state.Name.ValueString()+": "+err.Error(),
-			// )
+			tflog.Info(ctx, "Project not found, removing from state")
 			resp.State.RemoveResource(ctx)
 			return
 		}
@@ -336,6 +335,9 @@ func (r *projectResource) Delete(ctx context.Context, req resource.DeleteRequest
 		return
 	}
 
+	projectName := state.Name.ValueString()
+	ctx = tflog.SetField(ctx, "waypoint_project", projectName)
+
 	// Delete existing order
 	err := r.client.DestroyProject(ctx, state.Name.ValueString())
 	if err != nil {
@@ -382,6 +384,9 @@ func (r *projectResource) Update(ctx context.Context, req resource.UpdateRequest
 }
 
 func (r *projectResource) upsert(ctx context.Context, plan projectResourceModel) (projectResourceModel, error) {
+	projectName := plan.Name.ValueString()
+	ctx = tflog.SetField(ctx, "waypoint_project", projectName)
+
 	projectConf := waypointClient.DefaultProjectConfig()
 
 	// // Git configuration for Waypoint project
