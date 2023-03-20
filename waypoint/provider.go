@@ -166,6 +166,7 @@ func (p *waypointProvider) Configure(ctx context.Context, req provider.Configure
 func (p *waypointProvider) DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		NewRunnerProfileDataSource,
+		NewProjectDataSource,
 	}
 }
 
