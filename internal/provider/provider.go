@@ -174,6 +174,6 @@ func (p *waypointProvider) DataSources(_ context.Context) []func() datasource.Da
 func (p *waypointProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		NewProjectResource,
-		// NewRunnerProfileResource,
+		NewRunnerProfileResource,
 	}
 }

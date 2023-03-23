@@ -51,7 +51,6 @@ type profileDataModel struct {
 	Default              types.Bool        `tfsdk:"default"`
 	EnvironmentVariables map[string]string `tfsdk:"environment_variables"`
 	TargetRunnerLabels   map[string]string `tfsdk:"target_runner_labels"`
-	// EnvironmentVariables types.Map `tfsdk:"environment_variables"`
 }
 
 // Schema defines the schema for the data source.
