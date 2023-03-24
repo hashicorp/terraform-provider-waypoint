@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-provider-waypoint/internal/defaults"
@@ -34,14 +35,14 @@ type runnerProfileResource struct {
 
 // profileResourceModel maps the data schema data.
 type profileResourceModel struct {
-	ID         types.String `tfsdk:"id"`
-	Name       types.String `tfsdk:"name"`
-	OciURL     types.String `tfsdk:"oci_url"`
-	PluginType types.String `tfsdk:"plugin_type"`
-	// PluginConfig         types.String      `tfsdk:"plugin_config"`
+	ID                 types.String `tfsdk:"id"`
+	Name               types.String `tfsdk:"name"`
+	OciURL             types.String `tfsdk:"oci_url"`
+	PluginType         types.String `tfsdk:"plugin_type"`
+	PluginConfig       types.String `tfsdk:"plugin_config"`
+	PluginConfigFormat types.String `tfsdk:"plugin_config_format"`
+	Default            types.Bool   `tfsdk:"default"`
 	// TargetRunnerId       types.String      `tfsdk:"target_runner_id"`
-	// PluginConfigFormat   types.String      `tfsdk:"plugin_config_format"`
-	// Default              types.Bool        `tfsdk:"default"`
 	// EnvironmentVariables map[string]string `tfsdk:"environment_variables"`
 	// TargetRunnerLabels   map[string]string `tfsdk:"target_runner_labels"`
 }
@@ -67,6 +68,9 @@ func (r *runnerProfileResource) Schema(_ context.Context, _ resource.SchemaReque
 			"id": schema.StringAttribute{
 				Computed:    true,
 				Description: "Waypoint generated ID for the runner config",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"name": schema.StringAttribute{
 				Required:    true,
@@ -81,21 +85,29 @@ func (r *runnerProfileResource) Schema(_ context.Context, _ resource.SchemaReque
 				},
 			},
 			"plugin_type": schema.StringAttribute{
-				Optional:    true,
+				Required:    true,
 				Description: "Plugin type for runner i.e docker / kubernetes / aws-ecs.",
 			},
-			// "plugin_config": schema.StringAttribute{
-			// 	Optional:    true,
-			// 	Description: "plugin config is the configuration for the plugin that is created. It is usually HCL and is decoded like the other plugins, and is plugin specific.",
-			// },
-			// "plugin_config_format": schema.Int64Attribute{
-			// 	Optional:    true,
-			// 	Description: "config format specifies the format of plugin_config.",
-			// },
-			// "default": schema.BoolAttribute{
-			// 	Optional:    true,
-			// 	Description: "Indicates if this runner profile is the default for any new projects",
-			// },
+			"plugin_config": schema.StringAttribute{
+				Optional:    true,
+				Description: "Plugin config is the configuration for the plugin that is created. It is usually HCL and is decoded like the other plugins, and is plugin specific.",
+			},
+			"plugin_config_format": schema.StringAttribute{
+				Optional: true,
+				Computed: true,
+				PlanModifiers: []planmodifier.String{
+					defaults.StringDefaultValue(types.StringValue("HCL")),
+				},
+				Description: "Config format specifies the format of plugin_config. Valid values are HCL or JSON. The default is HCL",
+			},
+			"default": schema.BoolAttribute{
+				Optional:    true,
+				Computed:    true,
+				Description: "Indicates if this runner profile is the default for any new projects. The default is false",
+				PlanModifiers: []planmodifier.Bool{
+					defaults.BoolDefaultValue(types.BoolValue(false)),
+				},
+			},
 			// "target_runner_id": schema.StringAttribute{
 			// 	Optional:    true,
 			// 	Description: "The ID of the target runner for this profile.",
@@ -141,9 +153,6 @@ func (r *runnerProfileResource) Create(ctx context.Context, req resource.CreateR
 	runnerConfig := waypointClient.DefaultRunnerConfig()
 	runnerConfig.Name = profileName
 
-	// if ociUrl, ok := d.Get("oci_url").(string); ok {
-	// 	runnerConfig.OciUrl = ociUrl
-	// }
 	if ociURL := plan.OciURL.ValueString(); ociURL != "" {
 		runnerConfig.OciUrl = ociURL
 	}
@@ -152,17 +161,26 @@ func (r *runnerProfileResource) Create(ctx context.Context, req resource.CreateR
 		runnerConfig.PluginType = pluginType
 	}
 
-	// if pluginConfig, ok := d.Get("plugin_config").(string); ok {
-	// 	runnerConfig.PluginConfig = []byte(pluginConfig)
-	// }
+	if pluginConfig := plan.PluginConfig.ValueString(); pluginConfig != "" {
+		runnerConfig.PluginConfig = []byte(pluginConfig)
+	}
 
-	// if pluginConfigFormat, ok := d.Get("plugin_config_format").(int); ok {
-	// 	runnerConfig.ConfigFormat = pluginConfigFormat
-	// }
+	if pluginConfigFormat := plan.PluginConfigFormat.ValueString(); pluginConfigFormat != "" {
+		switch pluginConfigFormat {
+		case "HCL":
+			// HCL is 0
+			runnerConfig.ConfigFormat = 0
+		case "JSON":
+			// JSON is 1
+			runnerConfig.ConfigFormat = 1
+		default:
+			// error
+		}
+	}
 
-	// if defaultProfile, ok := d.Get("default").(bool); ok {
-	// 	runnerConfig.Default = defaultProfile
-	// }
+	if defaultProfile := plan.Default.ValueBool(); defaultProfile {
+		runnerConfig.Default = defaultProfile
+	}
 
 	// tRId := d.Get("target_runner_id").(string)
 	// if len(tRId) > 0 {
@@ -213,7 +231,7 @@ func (r *runnerProfileResource) Create(ctx context.Context, req resource.CreateR
 		)
 		return
 	}
-	plan.ID = types.StringValue(runnerProfile.Config.Id)
+	plan.ID = types.StringValue(runnerProfile.Config.GetId())
 
 	// Set state to fully populated data
 	diags = resp.State.Set(ctx, plan)
@@ -251,10 +269,18 @@ func (r *runnerProfileResource) Read(ctx context.Context, req resource.ReadReque
 		)
 		return
 	}
-
-	state.ID = types.StringValue(runnerProfile.Config.Id)
+	// re-add the ID here, the response doesn't have it
+	state.ID = types.StringValue(runnerProfile.Config.GetId())
 	state.Name = types.StringValue(runnerProfile.Config.Name)
 	state.OciURL = types.StringValue(runnerProfile.Config.OciUrl)
+	state.PluginType = types.StringValue(runnerProfile.Config.PluginType)
+	if runnerProfile.Config.GetPluginConfig() == nil {
+		state.PluginConfig = types.StringNull()
+	} else {
+		state.PluginConfig = types.StringValue(string(runnerProfile.Config.PluginConfig))
+	}
+	state.PluginConfigFormat = types.StringValue(runnerProfile.Config.ConfigFormat.String())
+	state.Default = types.BoolValue(runnerProfile.Config.Default)
 
 	// Set refreshed state
 	diags = resp.State.Set(ctx, &state)
@@ -278,15 +304,15 @@ func (r *runnerProfileResource) Update(ctx context.Context, req resource.UpdateR
 	profileName := plan.Name.ValueString()
 	ctx = tflog.SetField(ctx, "waypoint_runner_profile", profileName)
 
-	var err error
+	// var err error
 	// plan, err = r.upsert(ctx, plan)
-	if err != nil {
-		resp.Diagnostics.AddError(
-			"Error updating runner profile",
-			"Could not update runner profile, unexpected error: "+err.Error(),
-		)
-		return
-	}
+	// if err != nil {
+	// 	resp.Diagnostics.AddError(
+	// 		"Error updating runner profile",
+	// 		"Could not update runner profile, unexpected error: "+err.Error(),
+	// 	)
+	// 	return
+	// }
 
 	// Set state to fully populated data
 	diags = resp.State.Set(ctx, plan)
@@ -298,4 +324,24 @@ func (r *runnerProfileResource) Update(ctx context.Context, req resource.UpdateR
 
 // Delete deletes the resource and removes the Terraform state on success.
 func (r *runnerProfileResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	// Retrieve values from state
+	var state profileResourceModel
+	diags := req.State.Get(ctx, &state)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	profileID := state.ID.ValueString()
+	ctx = tflog.SetField(ctx, "waypoint_runner_profile", profileID)
+
+	// Delete existing profile
+	err := r.client.DeleteRunnerProfile(ctx, profileID)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error Deleting Waypoint Runner Profile",
+			"Could not delete runner profile, unexpected error: "+err.Error(),
+		)
+		return
+	}
 }

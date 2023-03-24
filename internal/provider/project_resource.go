@@ -338,7 +338,7 @@ func (r *projectResource) Delete(ctx context.Context, req resource.DeleteRequest
 	projectName := state.Name.ValueString()
 	ctx = tflog.SetField(ctx, "waypoint_project", projectName)
 
-	// Delete existing order
+	// Delete existing project
 	err := r.client.DestroyProject(ctx, state.Name.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
