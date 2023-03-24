@@ -1,7 +1,7 @@
 name = waypoint
 organization = hashicorp
 version = 0.1.0
-arch = darwin_amd64
+arch = darwin_arm64
 #arch = linux_amd64
 
 build:
