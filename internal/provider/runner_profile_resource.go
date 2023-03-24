@@ -4,6 +4,7 @@ import (
 	"context"
 
 	waypointClient "github.com/hashicorp-dev-advocates/waypoint-client/pkg/client"
+	gen "github.com/hashicorp-dev-advocates/waypoint-client/pkg/waypoint"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -42,7 +43,7 @@ type profileResourceModel struct {
 	PluginConfig       types.String `tfsdk:"plugin_config"`
 	PluginConfigFormat types.String `tfsdk:"plugin_config_format"`
 	Default            types.Bool   `tfsdk:"default"`
-	// TargetRunnerId       types.String      `tfsdk:"target_runner_id"`
+	TargetRunnerId     types.String `tfsdk:"target_runner_id"`
 	// EnvironmentVariables map[string]string `tfsdk:"environment_variables"`
 	// TargetRunnerLabels   map[string]string `tfsdk:"target_runner_labels"`
 }
@@ -108,15 +109,15 @@ func (r *runnerProfileResource) Schema(_ context.Context, _ resource.SchemaReque
 					defaults.BoolDefaultValue(types.BoolValue(false)),
 				},
 			},
-			// "target_runner_id": schema.StringAttribute{
-			// 	Optional:    true,
-			// 	Description: "The ID of the target runner for this profile.",
-			// 	Validators: []validator.String{
-			// 		stringvalidator.ConflictsWith(path.Expressions{
-			// 			path.MatchRoot("target_runner_labels"),
-			// 		}...),
-			// 	},
-			// },
+			"target_runner_id": schema.StringAttribute{
+				Optional:    true,
+				Description: "The ID of the target runner for this profile.",
+				// Validators: []validator.String{
+				// 	stringvalidator.ConflictsWith(path.Expressions{
+				// 		path.MatchRoot("target_runner_labels"),
+				// 	}...),
+				// },
+			},
 			// "target_runner_labels": schema.MapAttribute{
 			// 	Optional:    true,
 			// 	Description: "A map of labels on target runners",
@@ -182,14 +183,15 @@ func (r *runnerProfileResource) Create(ctx context.Context, req resource.CreateR
 		runnerConfig.Default = defaultProfile
 	}
 
-	// tRId := d.Get("target_runner_id").(string)
-	// if len(tRId) > 0 {
-
-	// 	if targetRunnerId, ok := d.Get("target_runner_id").(string); ok {
-	// 		runnerConfig.TargetRunner = &gen.Ref_Runner{Target: &gen.Ref_Runner_Id{Id: &gen.Ref_RunnerId{Id: targetRunnerId}}}
-	// 	}
-	// }
-
+	if !plan.TargetRunnerId.IsNull() && plan.TargetRunnerId.ValueString() != "" {
+		runnerConfig.TargetRunner = &gen.Ref_Runner{
+			Target: &gen.Ref_Runner_Id{
+				Id: &gen.Ref_RunnerId{
+					Id: plan.TargetRunnerId.ValueString(),
+				},
+			},
+		}
+	}
 	// tRL := d.Get("target_runner_labels").(map[string]interface{})
 
 	// if len(tRL) > 0 {
@@ -282,6 +284,19 @@ func (r *runnerProfileResource) Read(ctx context.Context, req resource.ReadReque
 	state.PluginConfigFormat = types.StringValue(runnerProfile.Config.ConfigFormat.String())
 	state.Default = types.BoolValue(runnerProfile.Config.Default)
 
+	if runnerProfile.Config.GetTargetRunner() == nil {
+		state.TargetRunnerId = types.StringNull()
+	} else {
+		runner := runnerProfile.Config.GetTargetRunner()
+		// it's possible this runner is empty, which can happen if the
+		// configuration references a target runner id that doesn't actually
+		// exist. We need to check if the ID here is nil before trying to set
+		// things
+		if id := runner.GetId(); id != nil {
+			state.TargetRunnerId = types.StringValue(id.GetId())
+		}
+		state.TargetRunnerId = types.StringNull()
+	}
 	// Set refreshed state
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
