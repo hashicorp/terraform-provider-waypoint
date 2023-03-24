@@ -389,7 +389,7 @@ func (r *projectResource) upsert(ctx context.Context, plan projectResourceModel)
 
 	projectConf := waypointClient.DefaultProjectConfig()
 
-	// // Git configuration for Waypoint project
+	// Git configuration for Waypoint project
 	gitConfig := waypointClient.Git{
 		Url:                      plan.DataSourceGit.Url.ValueString(),
 		Path:                     plan.DataSourceGit.Path.ValueString(),
@@ -397,7 +397,6 @@ func (r *projectResource) upsert(ctx context.Context, plan projectResourceModel)
 		Ref:                      plan.DataSourceGit.Ref.ValueString(),
 	}
 
-	// if len(authBasicList) > 0 {
 	if plan.GitAuthBasic != nil {
 		auth := &waypointClient.GitAuthBasic{
 			Username: plan.GitAuthBasic.Username.ValueString(),
