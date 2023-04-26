@@ -148,84 +148,8 @@ func (r *runnerProfileResource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 
-	profileName := plan.Name.ValueString()
-	ctx = tflog.SetField(ctx, "waypoint_runner_profile", profileName)
-
-	runnerConfig := waypointClient.DefaultRunnerConfig()
-	runnerConfig.Name = profileName
-
-	if ociURL := plan.OciURL.ValueString(); ociURL != "" {
-		runnerConfig.OciUrl = ociURL
-	}
-
-	if pluginType := plan.PluginType.ValueString(); pluginType != "" {
-		runnerConfig.PluginType = pluginType
-	}
-
-	if pluginConfig := plan.PluginConfig.ValueString(); pluginConfig != "" {
-		runnerConfig.PluginConfig = []byte(pluginConfig)
-	}
-
-	if pluginConfigFormat := plan.PluginConfigFormat.ValueString(); pluginConfigFormat != "" {
-		switch pluginConfigFormat {
-		case "HCL":
-			// HCL is 0
-			runnerConfig.ConfigFormat = 0
-		case "JSON":
-			// JSON is 1
-			runnerConfig.ConfigFormat = 1
-		default:
-			// error
-		}
-	}
-
-	if defaultProfile := plan.Default.ValueBool(); defaultProfile {
-		runnerConfig.Default = defaultProfile
-	}
-
-	if !plan.TargetRunnerId.IsNull() && plan.TargetRunnerId.ValueString() != "" {
-		runnerConfig.TargetRunner = &gen.Ref_Runner{
-			Target: &gen.Ref_Runner_Id{
-				Id: &gen.Ref_RunnerId{
-					Id: plan.TargetRunnerId.ValueString(),
-				},
-			},
-		}
-	}
-	// tRL := d.Get("target_runner_labels").(map[string]interface{})
-
-	// if len(tRL) > 0 {
-
-	// 	if targetRunnerLabels, ok := d.Get("target_runner_labels").(map[string]interface{}); ok {
-	// 		labels := make(map[string]string)
-
-	// 		for k, v := range targetRunnerLabels {
-	// 			strKey := fmt.Sprintf("%v", k)
-	// 			strValue := fmt.Sprintf("%v", v)
-	// 			labels[strKey] = strValue
-	// 		}
-
-	// 		runnerConfig.TargetRunner.Target = &gen.Ref_Runner_Labels{
-	// 			Labels: &gen.Ref_RunnerLabels{
-	// 				Labels: labels,
-	// 			}}
-	// 	}
-	// }
-
-	// runnerVariables := make(map[string]string)
-	// if environmentVariables, ok := d.Get("environment_variables").(map[string]interface{}); ok {
-
-	// 	for k, v := range environmentVariables {
-	// 		strKey := fmt.Sprintf("%v", k)
-	// 		strValue := fmt.Sprintf("%v", v)
-	// 		runnerVariables[strKey] = strValue
-	// 	}
-
-	// 	runnerConfig.EnvironmentVariables = runnerVariables
-
-	// }
-
-	runnerProfile, err := r.client.CreateRunnerProfile(ctx, runnerConfig)
+	var err error
+	plan, err = r.upsert(ctx, plan)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error creating runner profile",
@@ -233,7 +157,6 @@ func (r *runnerProfileResource) Create(ctx context.Context, req resource.CreateR
 		)
 		return
 	}
-	plan.ID = types.StringValue(runnerProfile.Config.GetId())
 
 	// Set state to fully populated data
 	diags = resp.State.Set(ctx, plan)
@@ -316,18 +239,17 @@ func (r *runnerProfileResource) Update(ctx context.Context, req resource.UpdateR
 		return
 	}
 
-	profileName := plan.Name.ValueString()
-	ctx = tflog.SetField(ctx, "waypoint_runner_profile", profileName)
+	ctx = tflog.SetField(ctx, "waypoint_runner_profile_id", plan.ID.String())
 
-	// var err error
-	// plan, err = r.upsert(ctx, plan)
-	// if err != nil {
-	// 	resp.Diagnostics.AddError(
-	// 		"Error updating runner profile",
-	// 		"Could not update runner profile, unexpected error: "+err.Error(),
-	// 	)
-	// 	return
-	// }
+	var err error
+	plan, err = r.upsert(ctx, plan)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error updating runner profile",
+			"Could not update runner profile, unexpected error: "+err.Error(),
+		)
+		return
+	}
 
 	// Set state to fully populated data
 	diags = resp.State.Set(ctx, plan)
@@ -335,6 +257,91 @@ func (r *runnerProfileResource) Update(ctx context.Context, req resource.UpdateR
 	if resp.Diagnostics.HasError() {
 		return
 	}
+}
+
+func (r *runnerProfileResource) upsert(ctx context.Context, plan profileResourceModel) (profileResourceModel, error) {
+	profileName := plan.Name.ValueString()
+	ctx = tflog.SetField(ctx, "waypoint_runner_profile", profileName)
+
+	runnerConfig := waypointClient.DefaultRunnerConfig()
+	runnerConfig.Name = profileName
+
+	if ociURL := plan.OciURL.ValueString(); ociURL != "" {
+		runnerConfig.OciUrl = ociURL
+	}
+
+	if pluginType := plan.PluginType.ValueString(); pluginType != "" {
+		runnerConfig.PluginType = pluginType
+	}
+
+	if pluginConfig := plan.PluginConfig.ValueString(); pluginConfig != "" {
+		runnerConfig.PluginConfig = []byte(pluginConfig)
+	}
+
+	if pluginConfigFormat := plan.PluginConfigFormat.ValueString(); pluginConfigFormat != "" {
+		switch pluginConfigFormat {
+		case "HCL":
+			// HCL is 0
+			runnerConfig.ConfigFormat = 0
+		case "JSON":
+			// JSON is 1
+			runnerConfig.ConfigFormat = 1
+		default:
+			// error
+		}
+	}
+
+	if defaultProfile := plan.Default.ValueBool(); defaultProfile {
+		runnerConfig.Default = defaultProfile
+	}
+
+	if !plan.TargetRunnerId.IsNull() && plan.TargetRunnerId.ValueString() != "" {
+		runnerConfig.TargetRunner = &gen.Ref_Runner{
+			Target: &gen.Ref_Runner_Id{
+				Id: &gen.Ref_RunnerId{
+					Id: plan.TargetRunnerId.ValueString(),
+				},
+			},
+		}
+	}
+	// tRL := d.Get("target_runner_labels").(map[string]interface{})
+
+	// if len(tRL) > 0 {
+
+	// 	if targetRunnerLabels, ok := d.Get("target_runner_labels").(map[string]interface{}); ok {
+	// 		labels := make(map[string]string)
+
+	// 		for k, v := range targetRunnerLabels {
+	// 			strKey := fmt.Sprintf("%v", k)
+	// 			strValue := fmt.Sprintf("%v", v)
+	// 			labels[strKey] = strValue
+	// 		}
+
+	// 		runnerConfig.TargetRunner.Target = &gen.Ref_Runner_Labels{
+	// 			Labels: &gen.Ref_RunnerLabels{
+	// 				Labels: labels,
+	// 			}}
+	// 	}
+	// }
+
+	// runnerVariables := make(map[string]string)
+	// if environmentVariables, ok := d.Get("environment_variables").(map[string]interface{}); ok {
+
+	// 	for k, v := range environmentVariables {
+	// 		strKey := fmt.Sprintf("%v", k)
+	// 		strValue := fmt.Sprintf("%v", v)
+	// 		runnerVariables[strKey] = strValue
+	// 	}
+
+	// 	runnerConfig.EnvironmentVariables = runnerVariables
+
+	// }
+
+	// Upsert the profile; the method CreateRunnerProfile itself uses upsert
+	runnerProfile, err := r.client.CreateRunnerProfile(ctx, runnerConfig)
+	plan.ID = types.StringValue(runnerProfile.Config.GetId())
+
+	return plan, err
 }
 
 // Delete deletes the resource and removes the Terraform state on success.
