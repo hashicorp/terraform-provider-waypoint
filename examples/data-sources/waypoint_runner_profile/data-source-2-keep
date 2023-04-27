@@ -9,7 +9,7 @@ terraform {
 
 provider "waypoint" {
   host  = "localhost:9701"
-  token = "BCkP8cw7qjs4cC1Lc58KeXeLmaak4qDUUYrTs4f2R4yocugY6dymbiNhwE1SNnh4F8EFrVWY3pbk31nbmEszhyUGkG9HXViEwWMbzzd7TbSsV2RNNzhSfC6wCfnbfJQxmaugvW6HvNjHUMP2G"
+  token = ""
 }
 
 data "waypoint_runner_profile" "default_docker" {
