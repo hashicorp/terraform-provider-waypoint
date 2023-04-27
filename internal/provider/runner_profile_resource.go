@@ -5,10 +5,14 @@ import (
 
 	waypointClient "github.com/hashicorp-dev-advocates/waypoint-client/pkg/client"
 	gen "github.com/hashicorp-dev-advocates/waypoint-client/pkg/waypoint"
+	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-provider-waypoint/internal/defaults"
@@ -36,16 +40,16 @@ type runnerProfileResource struct {
 
 // profileResourceModel maps the data schema data.
 type profileResourceModel struct {
-	ID                 types.String `tfsdk:"id"`
-	Name               types.String `tfsdk:"name"`
-	OciURL             types.String `tfsdk:"oci_url"`
-	PluginType         types.String `tfsdk:"plugin_type"`
-	PluginConfig       types.String `tfsdk:"plugin_config"`
-	PluginConfigFormat types.String `tfsdk:"plugin_config_format"`
-	Default            types.Bool   `tfsdk:"default"`
-	TargetRunnerId     types.String `tfsdk:"target_runner_id"`
-	// EnvironmentVariables map[string]string `tfsdk:"environment_variables"`
-	// TargetRunnerLabels   map[string]string `tfsdk:"target_runner_labels"`
+	ID                   types.String      `tfsdk:"id"`
+	Name                 types.String      `tfsdk:"name"`
+	OciURL               types.String      `tfsdk:"oci_url"`
+	PluginType           types.String      `tfsdk:"plugin_type"`
+	PluginConfig         types.String      `tfsdk:"plugin_config"`
+	PluginConfigFormat   types.String      `tfsdk:"plugin_config_format"`
+	Default              types.Bool        `tfsdk:"default"`
+	TargetRunnerId       types.String      `tfsdk:"target_runner_id"`
+	EnvironmentVariables map[string]string `tfsdk:"environment_variables"`
+	TargetRunnerLabels   map[string]string `tfsdk:"target_runner_labels"`
 }
 
 // Metadata returns the resource type name.
@@ -112,27 +116,27 @@ func (r *runnerProfileResource) Schema(_ context.Context, _ resource.SchemaReque
 			"target_runner_id": schema.StringAttribute{
 				Optional:    true,
 				Description: "The ID of the target runner for this profile.",
-				// Validators: []validator.String{
-				// 	stringvalidator.ConflictsWith(path.Expressions{
-				// 		path.MatchRoot("target_runner_labels"),
-				// 	}...),
-				// },
+				Validators: []validator.String{
+					stringvalidator.ConflictsWith(path.Expressions{
+						path.MatchRoot("target_runner_labels"),
+					}...),
+				},
 			},
-			// "target_runner_labels": schema.MapAttribute{
-			// 	Optional:    true,
-			// 	Description: "A map of labels on target runners",
-			// 	ElementType: types.StringType,
-			// 	Validators: []validator.Map{
-			// 		mapvalidator.ConflictsWith(path.Expressions{
-			// 			path.MatchRoot("target_runner_id"),
-			// 		}...),
-			// 	},
-			// },
-			// "environment_variables": schema.MapAttribute{
-			// 	Optional:    true,
-			// 	Description: "Any env vars that should be exposed to the on demand runner.",
-			// 	ElementType: types.StringType,
-			// },
+			"target_runner_labels": schema.MapAttribute{
+				Optional:    true,
+				Description: "A map of labels on target runners",
+				ElementType: types.StringType,
+				Validators: []validator.Map{
+					mapvalidator.ConflictsWith(path.Expressions{
+						path.MatchRoot("target_runner_id"),
+					}...),
+				},
+			},
+			"environment_variables": schema.MapAttribute{
+				Optional:    true,
+				Description: "Any environment variables that should be exposed to the on demand runner.",
+				ElementType: types.StringType,
+			},
 		},
 	}
 }
@@ -207,19 +211,23 @@ func (r *runnerProfileResource) Read(ctx context.Context, req resource.ReadReque
 	state.PluginConfigFormat = types.StringValue(runnerProfile.Config.ConfigFormat.String())
 	state.Default = types.BoolValue(runnerProfile.Config.Default)
 
-	if runnerProfile.Config.GetTargetRunner() == nil {
-		state.TargetRunnerId = types.StringNull()
-	} else {
-		runner := runnerProfile.Config.GetTargetRunner()
-		// it's possible this runner is empty, which can happen if the
+	state.TargetRunnerId = types.StringNull()
+	if runner := runnerProfile.Config.GetTargetRunner(); runner != nil {
+		// It is possible this runner is empty, which can happen if the
 		// configuration references a target runner id that doesn't actually
 		// exist. We need to check if the ID here is nil before trying to set
 		// things
 		if id := runner.GetId(); id != nil {
 			state.TargetRunnerId = types.StringValue(id.GetId())
 		}
-		state.TargetRunnerId = types.StringNull()
+
+		if labels := runner.GetLabels(); labels != nil {
+			state.TargetRunnerLabels = labels.GetLabels()
+		}
 	}
+
+	state.EnvironmentVariables = runnerProfile.Config.GetEnvironmentVariables()
+
 	// Set refreshed state
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -304,38 +312,18 @@ func (r *runnerProfileResource) upsert(ctx context.Context, plan profileResource
 			},
 		}
 	}
-	// tRL := d.Get("target_runner_labels").(map[string]interface{})
+	tRL := plan.TargetRunnerLabels
 
-	// if len(tRL) > 0 {
+	if len(tRL) > 0 {
+		runnerConfig.TargetRunner.Target = &gen.Ref_Runner_Labels{
+			Labels: &gen.Ref_RunnerLabels{
+				Labels: tRL,
+			}}
+	}
 
-	// 	if targetRunnerLabels, ok := d.Get("target_runner_labels").(map[string]interface{}); ok {
-	// 		labels := make(map[string]string)
-
-	// 		for k, v := range targetRunnerLabels {
-	// 			strKey := fmt.Sprintf("%v", k)
-	// 			strValue := fmt.Sprintf("%v", v)
-	// 			labels[strKey] = strValue
-	// 		}
-
-	// 		runnerConfig.TargetRunner.Target = &gen.Ref_Runner_Labels{
-	// 			Labels: &gen.Ref_RunnerLabels{
-	// 				Labels: labels,
-	// 			}}
-	// 	}
-	// }
-
-	// runnerVariables := make(map[string]string)
-	// if environmentVariables, ok := d.Get("environment_variables").(map[string]interface{}); ok {
-
-	// 	for k, v := range environmentVariables {
-	// 		strKey := fmt.Sprintf("%v", k)
-	// 		strValue := fmt.Sprintf("%v", v)
-	// 		runnerVariables[strKey] = strValue
-	// 	}
-
-	// 	runnerConfig.EnvironmentVariables = runnerVariables
-
-	// }
+	if environmentVariables := plan.EnvironmentVariables; environmentVariables != nil {
+		runnerConfig.EnvironmentVariables = environmentVariables
+	}
 
 	// Upsert the profile; the method CreateRunnerProfile itself uses upsert
 	runnerProfile, err := r.client.CreateRunnerProfile(ctx, runnerConfig)
