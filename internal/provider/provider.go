@@ -165,8 +165,9 @@ func (p *waypointProvider) Configure(ctx context.Context, req provider.Configure
 // DataSources defines the data sources implemented in the provider.
 func (p *waypointProvider) DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
-		NewRunnerProfileDataSource,
+		NewAuthMethodDataSource,
 		NewProjectDataSource,
+		NewRunnerProfileDataSource,
 	}
 }
 
