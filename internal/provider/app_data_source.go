@@ -78,18 +78,18 @@ func (d *appDataSource) Read(ctx context.Context, req datasource.ReadRequest, re
 
 	appName := state.Name.ValueString()
 	projName := state.Project.ValueString()
+	if state.Name.ValueString() == "" || state.Project.ValueString() == "" {
+		resp.Diagnostics.AddError(
+			"App and Project are both needed for app lookup",
+			"Could not find App with name: "+state.Name.ValueString()+" and project: "+state.Project.ValueString(),
+		)
+		return
+	}
 	ctx = tflog.SetField(ctx, "application", appName)
 
 	// Get app based on tf config
 	app, err := d.client.GetApp(ctx, appName, projName)
 	if err != nil {
-		if state.Name.ValueString() == "" || state.Project.ValueString() == "" {
-			resp.Diagnostics.AddError(
-				"App and Project are both needed for app lookup",
-				"Could not find App with name: "+state.Name.ValueString()+" and project: "+state.Project.ValueString()+". "+err.Error(),
-			)
-			return
-		}
 		resp.Diagnostics.AddError(
 			"Error Reading App",
 			"Could not find App with name: "+state.Name.ValueString()+" and project: "+state.Project.ValueString()+". "+err.Error(),
