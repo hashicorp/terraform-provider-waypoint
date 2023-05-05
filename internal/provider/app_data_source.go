@@ -7,8 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 // Ensure the implementation satisfies the expected interfaces.
@@ -85,20 +83,22 @@ func (d *appDataSource) Read(ctx context.Context, req datasource.ReadRequest, re
 	// Get app based on tf config
 	app, err := d.client.GetApp(ctx, appName, projName)
 	if err != nil {
-		if status.Code(err) == codes.NotFound {
-			tflog.Info(ctx, "Application not found, removing from state")
-			resp.State.RemoveResource(ctx)
+		if state.Name.ValueString() == "" || state.Project.ValueString() == "" {
+			resp.Diagnostics.AddError(
+				"App and Project are both needed for app lookup",
+				"Could not find App with name: "+state.Name.ValueString()+" and project: "+state.Project.ValueString()+". "+err.Error(),
+			)
 			return
 		}
-
 		resp.Diagnostics.AddError(
-			"Error Reading Application",
-			"Could not read Application with name "+state.Name.ValueString()+": "+err.Error(),
+			"Error Reading App",
+			"Could not find App with name: "+state.Name.ValueString()+" and project: "+state.Project.ValueString()+". "+err.Error(),
 		)
+
 		return
 	}
 
-	// Set var back to state
+	// Set vars back to state
 	state.Project = types.StringValue(app.Project.Project)
 	state.Name = types.StringValue(app.Name)
 	state.FileChangeSignal = types.StringValue(app.FileChangeSignal)

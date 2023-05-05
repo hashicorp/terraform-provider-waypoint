@@ -119,7 +119,7 @@ func (d *runnerProfileDataSource) Read(ctx context.Context, req datasource.ReadR
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error Reading Runner Profile",
-			"Could not read Runner Profile with ID"+state.ID.ValueString()+": "+err.Error(),
+			"Could not find Runner Profile with ID: "+state.ID.ValueString()+". "+err.Error(),
 		)
 		return
 	}
