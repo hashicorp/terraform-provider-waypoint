@@ -148,11 +148,6 @@ func (r *authMethodResource) Create(ctx context.Context, req resource.CreateRequ
 	plan, diags = r.upsert(ctx, plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
-		// if err != nil {
-		// resp.Diagnostics.AddError(
-		// 	"Error updating auth method",
-		// 	"Could not update auth method, unexpected error: "+err.Error(),
-		// )
 		return
 	}
 
@@ -179,11 +174,6 @@ func (r *authMethodResource) Update(ctx context.Context, req resource.UpdateRequ
 	plan, diags = r.upsert(ctx, plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
-		// if err != nil {
-		// resp.Diagnostics.AddError(
-		// 	"Error updating auth method",
-		// 	"Could not update auth method, unexpected error: "+err.Error(),
-		// )
 		return
 	}
 
