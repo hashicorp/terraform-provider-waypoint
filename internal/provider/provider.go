@@ -176,5 +176,6 @@ func (p *waypointProvider) Resources(_ context.Context) []func() resource.Resour
 	return []func() resource.Resource{
 		NewProjectResource,
 		NewRunnerProfileResource,
+		NewAuthMethodResource,
 	}
 }
