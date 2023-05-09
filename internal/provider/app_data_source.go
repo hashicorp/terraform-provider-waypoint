@@ -81,7 +81,7 @@ func (d *appDataSource) Read(ctx context.Context, req datasource.ReadRequest, re
 	if state.Name.ValueString() == "" || state.Project.ValueString() == "" {
 		resp.Diagnostics.AddError(
 			"App and Project are both needed for app lookup",
-			"Could not find App with name: "+state.Name.ValueString()+" and project: "+state.Project.ValueString(),
+			"Please ensure that you have both an app and project defined in terraform.",
 		)
 		return
 	}
