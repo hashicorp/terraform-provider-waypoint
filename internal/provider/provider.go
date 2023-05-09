@@ -168,6 +168,7 @@ func (p *waypointProvider) DataSources(_ context.Context) []func() datasource.Da
 		NewAuthMethodDataSource,
 		NewProjectDataSource,
 		NewRunnerProfileDataSource,
+		NewAppDataSource,
 	}
 }
 
