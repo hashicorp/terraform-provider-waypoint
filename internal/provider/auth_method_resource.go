@@ -169,7 +169,6 @@ func (r *authMethodResource) Update(ctx context.Context, req resource.UpdateRequ
 		return
 	}
 
-	// var err error
 	plan, diags = r.upsert(ctx, plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
