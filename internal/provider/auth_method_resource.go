@@ -43,7 +43,7 @@ func (r *authMethodResource) Metadata(_ context.Context, req resource.MetadataRe
 	resp.TypeName = req.ProviderTypeName + "_auth_method"
 }
 
-// authMethodDataModel maps the data schema data.
+// authMethodResourceModel maps the data schema data.
 type authMethodResourceModel struct {
 	Name                types.String `tfsdk:"name"`
 	DisplayName         types.String `tfsdk:"display_name"`
