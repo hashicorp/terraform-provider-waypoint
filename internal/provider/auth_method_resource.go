@@ -64,7 +64,7 @@ type authMethodResourceModel struct {
 // Schema defines the schema for the resource.
 func (r *authMethodResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		// Schema defines the schema for the data source.
+		// Schema defines the schema for the resource.
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
 				Required:    true,
