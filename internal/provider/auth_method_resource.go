@@ -61,7 +61,7 @@ type authMethodResourceModel struct {
 	Auds                types.List   `tfsdk:"auds"`
 }
 
-// Schema defines the schema for the data source.
+// Schema defines the schema for the resource.
 func (r *authMethodResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		// Schema defines the schema for the data source.
