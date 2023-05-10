@@ -106,7 +106,7 @@ func (r *authMethodResource) Schema(_ context.Context, _ resource.SchemaRequest,
 			},
 			"list_claim_mappings": schema.MapAttribute{
 				Optional:    true,
-				Description: "Same as claim-mapping but for list values",
+				Description: "Same as claim_mappings but for list values",
 				ElementType: types.StringType,
 			},
 			"discovery_ca_pem": schema.ListAttribute{
