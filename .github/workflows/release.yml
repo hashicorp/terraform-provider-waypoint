@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   go-version:
-    runs-on: ubuntu-latest
+    runs-on: ["self-hosted", "linux", "small"]
     outputs:
       version: ${{ steps.go-version.outputs.version }}
     steps:
@@ -18,7 +18,7 @@ jobs:
       - id: go-version
         run: echo "version=$(cat ./.go-version)" >> $GITHUB_OUTPUT
   release-notes:
-    runs-on: ubuntu-latest
+    runs-on: ["self-hosted", "linux", "small"]
     steps:
       - uses: actions/checkout@v2
         with:
