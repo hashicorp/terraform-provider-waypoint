@@ -231,49 +231,6 @@ func (r *configSourceResource) upsert(ctx context.Context, plan configSourceReso
 		return plan, err
 	}
 
-	// if pluginConfigFormat := plan.PluginConfigFormat.ValueString(); pluginConfigFormat != "" {
-	// 	switch pluginConfigFormat {
-	// 	case "HCL":
-	// 		// HCL is 0
-	// 		runnerConfig.ConfigFormat = 0
-	// 	case "JSON":
-	// 		// JSON is 1
-	// 		runnerConfig.ConfigFormat = 1
-	// 	default:
-	// 		// error
-	// 	}
-	// }
-
-	// if defaultProfile := plan.Default.ValueBool(); defaultProfile {
-	// 	runnerConfig.Default = defaultProfile
-	// }
-
-	// if !plan.TargetRunnerId.IsNull() && plan.TargetRunnerId.ValueString() != "" {
-	// 	runnerConfig.TargetRunner = &gen.Ref_Runner{
-	// 		Target: &gen.Ref_Runner_Id{
-	// 			Id: &gen.Ref_RunnerId{
-	// 				Id: plan.TargetRunnerId.ValueString(),
-	// 			},
-	// 		},
-	// 	}
-	// }
-	// tRL := plan.TargetRunnerLabels
-
-	// if len(tRL) > 0 {
-	// 	runnerConfig.TargetRunner.Target = &gen.Ref_Runner_Labels{
-	// 		Labels: &gen.Ref_RunnerLabels{
-	// 			Labels: tRL,
-	// 		}}
-	// }
-
-	// if environmentVariables := plan.EnvironmentVariables; environmentVariables != nil {
-	// 	runnerConfig.EnvironmentVariables = environmentVariables
-	// }
-
-	// // Upsert the profile; the method CreateRunnerProfile itself uses upsert
-	// runnerProfile, err := r.client.CreateRunnerProfile(ctx, runnerConfig)
-	// plan.ID = types.StringValue(runnerProfile.Config.GetId())
-
 	return plan, nil
 }
 
