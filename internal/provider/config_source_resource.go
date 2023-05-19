@@ -163,14 +163,6 @@ func (r *configSourceResource) Read(ctx context.Context, req resource.ReadReques
 		state.Workspace = types.StringValue(ws.GetWorkspace())
 	}
 
-	// if runnerProfile.Config.GetPluginConfig() == nil {
-	// 	state.PluginConfig = types.StringNull()
-	// } else {
-	// 	state.PluginConfig = types.StringValue(string(runnerProfile.Config.PluginConfig))
-	// }
-	// state.PluginConfigFormat = types.StringValue(runnerProfile.Config.ConfigFormat.String())
-	// state.Default = types.BoolValue(runnerProfile.Config.Default)
-
 	state.Config = cfg.GetConfig()
 
 	// Set refreshed state
