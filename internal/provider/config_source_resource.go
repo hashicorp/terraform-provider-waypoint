@@ -155,9 +155,7 @@ func (r *configSourceResource) Read(ctx context.Context, req resource.ReadReques
 	}
 
 	ws := cfg.GetWorkspace()
-	if ws == nil {
-		// state.Workspace = types.StringNull()
-	} else if ws.GetWorkspace() == "" {
+	if ws == nil || ws.GetWorkspace() == "" {
 		state.Workspace = types.StringNull()
 	} else {
 		state.Workspace = types.StringValue(ws.GetWorkspace())
@@ -287,7 +285,4 @@ func (r *configSourceResource) ValidateConfig(ctx context.Context, req resource.
 			return
 		}
 	}
-}
-
-func sourceFromState() {
 }
