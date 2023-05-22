@@ -6,7 +6,7 @@ go 1.18
 // replace github.com/hashicorp-dev-advocates/waypoint-client => ../../hashicorp-dev-advocates/waypoint-client
 
 require (
-	github.com/hashicorp-dev-advocates/waypoint-client v0.0.0-20230509205120-4f90a9e11a23
+	github.com/hashicorp-dev-advocates/waypoint-client v0.0.0-20230522173916-7ed1f644a6fc
 	github.com/hashicorp/terraform-plugin-docs v0.10.1
 	github.com/hashicorp/terraform-plugin-framework v1.1.1
 	github.com/hashicorp/terraform-plugin-framework-validators v0.10.0
