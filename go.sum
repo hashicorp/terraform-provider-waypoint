@@ -61,8 +61,6 @@ github.com/google/uuid v1.1.1/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+
 github.com/google/uuid v1.1.2/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/google/uuid v1.3.0 h1:t6JiXgmwXMjEs8VusXIJk2BXHsn+wx8BZdTaoZ5fu7I=
 github.com/google/uuid v1.3.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
-github.com/hashicorp-dev-advocates/waypoint-client v0.0.0-20230509205120-4f90a9e11a23 h1:QDyyRFD4HUcro6+HpnAA6tHi/dramjll71JfFSBfSrE=
-github.com/hashicorp-dev-advocates/waypoint-client v0.0.0-20230509205120-4f90a9e11a23/go.mod h1:qlyjd0nuybV9Tf2PTksCAK6B78OP6icQ2d3H38/kiJU=
 github.com/hashicorp-dev-advocates/waypoint-client v0.0.0-20230522173916-7ed1f644a6fc h1:KF6PONwjd7lJZHPnsk65cjspfjb6Vdnzg28neAHs24g=
 github.com/hashicorp-dev-advocates/waypoint-client v0.0.0-20230522173916-7ed1f644a6fc/go.mod h1:qlyjd0nuybV9Tf2PTksCAK6B78OP6icQ2d3H38/kiJU=
 github.com/hashicorp/errwrap v1.0.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=
