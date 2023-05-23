@@ -3,12 +3,12 @@
 page_title: "waypoint_runner_profile Resource - terraform-provider-waypoint"
 subcategory: ""
 description: |-
-  Runner profile resource to configure Waypoint runners.
+  
 ---
 
 # waypoint_runner_profile (Resource)
 
-Runner profile resource to configure Waypoint runners.
+
 
 ## Example Usage
 
@@ -49,21 +49,21 @@ resource "waypoint_runner_profile" "example" {
 
 ### Required
 
-- `profile_name` (String) The name of the runner profile
+- `name` (String) The name of the runner profile
+- `plugin_type` (String) Plugin type for runner i.e docker / kubernetes / aws-ecs.
 
 ### Optional
 
-- `default` (Boolean) Indicates if this runner profile is the default for any new projects
-- `environment_variables` (Map of String) Any env vars that should be exposed to the on demand runner.
+- `default` (Boolean) Indicates if this runner profile is the default for any new projects. The default is false
+- `environment_variables` (Map of String) Any environment variables that should be exposed to the on demand runner.
 - `oci_url` (String) oci_url is the OCI image that will be used to boot the on demand runner.
-- `plugin_config` (String) plugin config is the configuration for the plugin that is created. It is usually HCL and is decoded like the other plugins, and is plugin specific.
-- `plugin_config_format` (Number) config format specifies the format of plugin_config.
-- `plugin_type` (String) Plugin type for runner i.e docker / kubernetes / aws-ecs.
+- `plugin_config` (String) Plugin config is the configuration for the plugin that is created. It is usually HCL and is decoded like the other plugins, and is plugin specific.
+- `plugin_config_format` (String) Config format specifies the format of plugin_config. Valid values are HCL or JSON. The default is HCL
 - `target_runner_id` (String) The ID of the target runner for this profile.
 - `target_runner_labels` (Map of String) A map of labels on target runners
 
 ### Read-Only
 
-- `id` (String) Computed ID of runner profile.
+- `id` (String) Waypoint generated ID for the runner config
 
 

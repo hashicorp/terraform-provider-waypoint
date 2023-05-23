@@ -3,12 +3,12 @@
 page_title: "waypoint_runner_profile Data Source - terraform-provider-waypoint"
 subcategory: ""
 description: |-
-  A data source to read waypoint runner profiles
+  
 ---
 
 # waypoint_runner_profile (Data Source)
 
-A data source to read waypoint runner profiles
+
 
 ## Example Usage
 
@@ -23,7 +23,7 @@ data "waypoint_runner_profile" "test" {
 
 ### Required
 
-- `id` (String) Computed ID of runner profile.
+- `id` (String) The id of the Runner profile
 
 ### Read-Only
 
@@ -31,9 +31,9 @@ data "waypoint_runner_profile" "test" {
 - `environment_variables` (Map of String) Any env vars that should be exposed to the on demand runner.
 - `oci_url` (String) oci_url is the OCI image that will be used to boot the on demand runner.
 - `plugin_config` (String) plugin config is the configuration for the plugin that is created. It is usually HCL and is decoded like the other plugins, and is plugin specific.
-- `plugin_config_format` (Number) config format specifies the format of plugin_config.
+- `plugin_config_format` (String) config format specifies the format of plugin_config.
 - `plugin_type` (String) Plugin type for runner i.e docker / kubernetes / aws-ecs.
-- `profile_name` (String) The name of the runner profile
+- `profile_name` (String) The name of the Runner profile
 - `target_runner_id` (String) The ID of the target runner for this profile.
 - `target_runner_labels` (Map of String) A map of labels on target runners
 
