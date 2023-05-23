@@ -175,8 +175,9 @@ func (p *waypointProvider) DataSources(_ context.Context) []func() datasource.Da
 // Resources defines the resources implemented in the provider.
 func (p *waypointProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
+		NewAuthMethodResource,
+		NewConfigSourceResource,
 		NewProjectResource,
 		NewRunnerProfileResource,
-		NewAuthMethodResource,
 	}
 }
