@@ -6,7 +6,7 @@ go 1.19
 // replace github.com/hashicorp-dev-advocates/waypoint-client => ../../hashicorp-dev-advocates/waypoint-client
 
 require (
-	github.com/hashicorp-dev-advocates/waypoint-client v0.0.0-20230522173916-7ed1f644a6fc
+	github.com/hashicorp-dev-advocates/waypoint-client v0.0.0-20230523194413-e2272e4cd31b
 	github.com/hashicorp/terraform-plugin-docs v0.14.1
 	github.com/hashicorp/terraform-plugin-framework v1.2.0
 	github.com/hashicorp/terraform-plugin-framework-validators v0.10.0
@@ -23,7 +23,7 @@ require (
 	github.com/armon/go-radix v1.0.0 // indirect
 	github.com/bgentry/speakeasy v0.1.0 // indirect
 	github.com/fatih/color v1.13.0 // indirect
-	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-checkpoint v0.5.0 // indirect
@@ -64,6 +64,6 @@ require (
 	golang.org/x/net v0.8.0 // indirect
 	golang.org/x/sys v0.6.0 // indirect
 	golang.org/x/text v0.8.0 // indirect
-	google.golang.org/genproto v0.0.0-20230110181048-76db0878b65f // indirect
+	google.golang.org/genproto v0.0.0-20230410155749-daa745c078e1 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect
 )
