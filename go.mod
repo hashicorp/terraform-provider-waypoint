@@ -1,6 +1,6 @@
 module github.com/hashicorp/terraform-provider-waypoint
 
-go 1.18
+go 1.19
 
 // used for local development things
 // replace github.com/hashicorp-dev-advocates/waypoint-client => ../../hashicorp-dev-advocates/waypoint-client
