@@ -6,12 +6,12 @@ go 1.19
 // replace github.com/hashicorp-dev-advocates/waypoint-client => ../../hashicorp-dev-advocates/waypoint-client
 
 require (
-	github.com/hashicorp-dev-advocates/waypoint-client v0.0.0-20230523194413-e2272e4cd31b
+	github.com/hashicorp-dev-advocates/waypoint-client v0.0.0-20230523195440-8dce5da42238
 	github.com/hashicorp/terraform-plugin-docs v0.14.1
 	github.com/hashicorp/terraform-plugin-framework v1.2.0
 	github.com/hashicorp/terraform-plugin-framework-validators v0.10.0
 	github.com/hashicorp/terraform-plugin-log v0.8.0
-	google.golang.org/grpc v1.54.0
+	google.golang.org/grpc v1.55.0
 )
 
 require (

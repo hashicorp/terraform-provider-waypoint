@@ -58,10 +58,14 @@ github.com/google/uuid v1.1.1/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+
 github.com/google/uuid v1.1.2/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/google/uuid v1.3.0 h1:t6JiXgmwXMjEs8VusXIJk2BXHsn+wx8BZdTaoZ5fu7I=
 github.com/google/uuid v1.3.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
+github.com/hashicorp-dev-advocates/waypoint-client v0.0.0-20230522173916-7ed1f644a6fc h1:KF6PONwjd7lJZHPnsk65cjspfjb6Vdnzg28neAHs24g=
+github.com/hashicorp-dev-advocates/waypoint-client v0.0.0-20230522173916-7ed1f644a6fc/go.mod h1:qlyjd0nuybV9Tf2PTksCAK6B78OP6icQ2d3H38/kiJU=
 github.com/hashicorp-dev-advocates/waypoint-client v0.0.0-20230523192703-a87bbeb27c73 h1:7uSdsp1znvQbOBBeWMlA9Mfyfw7MZftEnk7q218NK74=
 github.com/hashicorp-dev-advocates/waypoint-client v0.0.0-20230523192703-a87bbeb27c73/go.mod h1:2HDTZV8UCivTHW3ZWBvNdMzqp8gudHQgT1KGdoC1Brg=
 github.com/hashicorp-dev-advocates/waypoint-client v0.0.0-20230523194413-e2272e4cd31b h1:H7SVloq2G6sVTK25k2ZVkIgMZaupCn/R2utDC/enY94=
 github.com/hashicorp-dev-advocates/waypoint-client v0.0.0-20230523194413-e2272e4cd31b/go.mod h1:NysVJuJqam9n2YRh1OwbuAkB0pNCgR9Mr7dYmyApVD8=
+github.com/hashicorp-dev-advocates/waypoint-client v0.0.0-20230523195440-8dce5da42238 h1:uRMkBf42N+CycG8lSE1Hc12PmEwzlKQtkailXuXiO+Y=
+github.com/hashicorp-dev-advocates/waypoint-client v0.0.0-20230523195440-8dce5da42238/go.mod h1:uUDG4MVBV8fcRBemqaEDXJvnNIAQUZG/NMwUwv45BQA=
 github.com/hashicorp/errwrap v1.0.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=
 github.com/hashicorp/errwrap v1.1.0 h1:OxrOeh75EUXMY8TBjag2fzXGZ40LB6IKw45YeGUDY2I=
 github.com/hashicorp/errwrap v1.1.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=
@@ -283,6 +287,8 @@ google.golang.org/genproto v0.0.0-20230410155749-daa745c078e1 h1:KpwkzHKEF7B9Zxg
 google.golang.org/genproto v0.0.0-20230410155749-daa745c078e1/go.mod h1:nKE/iIaLqn2bQwXBg8f1g2Ylh6r5MN5CmZvuzZCgsCU=
 google.golang.org/grpc v1.54.0 h1:EhTqbhiYeixwWQtAEZAxmV9MGqcjEU2mFx52xCzNyag=
 google.golang.org/grpc v1.54.0/go.mod h1:PUSEXI6iWghWaB6lXM4knEgpJNu2qUcKfDtNci3EC2g=
+google.golang.org/grpc v1.55.0 h1:3Oj82/tFSCeUrRTg/5E/7d/W5A1tj6Ky1ABAuZuv5ag=
+google.golang.org/grpc v1.55.0/go.mod h1:iYEXKGkEBhg1PjZQvoYEVPTDkHo1/bjTnfwTeGONTY8=
 google.golang.org/protobuf v1.26.0-rc.1/go.mod h1:jlhhOSvTdKEhbULTjvd4ARK9grFBp09yW+WbY/TyQbw=
 google.golang.org/protobuf v1.26.0/go.mod h1:9q0QmTI4eRPtz6boOQmLYwt+qCgq0jsYwAQnmE0givc=
 google.golang.org/protobuf v1.30.0 h1:kPPoIgf3TsEvrm0PFe15JQ+570QVxYzEvvHqChK+cng=
