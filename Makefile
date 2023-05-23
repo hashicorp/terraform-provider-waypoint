@@ -12,8 +12,18 @@ install: build
 	mv bin/terraform-provider-$(name)_v$(version) ~/.terraform.d/plugins/local/$(organization)/$(name)/$(version)/$(arch)/
 test:
 	go test ./internal/provider -v
+
+.PHONY: docs
 docs:
 	go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs
+
+.PHONY: tools
+tools: # Install dependencies and tools required to build
+	@echo "Fetching tools..."
+	go generate -tags tools tools/tools.go
+	@echo
+	@echo "Done!"
+
 multi_build:
 	@echo ""
 	@echo "Compile Provider"
