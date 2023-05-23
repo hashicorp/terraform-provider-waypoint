@@ -29,29 +29,6 @@ var (
 )
 
 func main() {
-	// var debugMode bool
-
-	// flag.BoolVar(&debugMode, "debug", false, "set to true to run the provider with support for debuggers like delve")
-	// flag.Parse()
-
-	// opts := &plugin.ServeOpts{
-	// 	Debug: debugMode,
-
-	// 	// TODO: update this string with the full name of your provider as used in your configs
-	// 	ProviderAddr: "registry.terraform.io/hashicorp/waypoint",
-
-	// 	ProviderFunc: waypoint.Provider,
-	// }
-
-	// plugin.Serve(opts)
-	// err := providerserver.Serve(
-	// 	context.Background(),
-	// 	waypoint.New(version),
-	// 	providerserver.ServeOpts{
-	// 		Address: "registry.terraform.io/hashicorp/waypoint",
-	// 	},
-	// )
-
 	var debug bool
 
 	flag.BoolVar(&debug, "debug", false, "set to true to run the provider with support for debuggers like delve")
