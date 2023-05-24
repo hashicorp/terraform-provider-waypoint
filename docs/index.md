@@ -33,5 +33,5 @@ provider "waypoint" {
 
 ### Optional
 
-- `token` (String) Waypoint token to authenticate to Waypoint server
-- `waypoint_addr` (String) Waypoint server address
+- `host` (String)
+- `token` (String)

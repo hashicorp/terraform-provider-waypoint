@@ -2,10 +2,11 @@ package main
 
 import (
 	"context"
+	"flag"
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
-	waypoint "github.com/hashicorp/terraform-provider-waypoint/internal/provider"
+	"github.com/hashicorp/terraform-provider-waypoint/internal/provider"
 )
 
 // Run "go generate" to format example terraform files and generate the docs for the registry/website
@@ -28,31 +29,19 @@ var (
 )
 
 func main() {
-	// var debugMode bool
+	var debug bool
 
-	// flag.BoolVar(&debugMode, "debug", false, "set to true to run the provider with support for debuggers like delve")
-	// flag.Parse()
+	flag.BoolVar(&debug, "debug", false, "set to true to run the provider with support for debuggers like delve")
+	flag.Parse()
 
-	// opts := &plugin.ServeOpts{
-	// 	Debug: debugMode,
-
-	// 	// TODO: update this string with the full name of your provider as used in your configs
-	// 	ProviderAddr: "registry.terraform.io/hashicorp/waypoint",
-
-	// 	ProviderFunc: waypoint.Provider,
-	// }
-
-	// plugin.Serve(opts)
-	err := providerserver.Serve(
-		context.Background(),
-		waypoint.New,
-		providerserver.ServeOpts{
-			Address: "registry.terraform.io/hashicorp/waypoint",
-		},
-	)
-
-	if err != nil {
-		log.Fatal(err)
+	opts := providerserver.ServeOpts{
+		Address: "registry.terraform.io/hashicorp/waypoint",
+		Debug:   debug,
 	}
 
+	err := providerserver.Serve(context.Background(), provider.New(version), opts)
+
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 }

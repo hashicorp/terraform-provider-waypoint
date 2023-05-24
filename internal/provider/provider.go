@@ -19,21 +19,31 @@ var (
 	_ provider.Provider = &waypointProvider{}
 )
 
-type waypointProvider struct{}
+type waypointProvider struct {
+	// version is set to the provider version on release, "dev" when the
+	// provider is built and ran locally, and "test" when running acceptance
+	// testing.
+	version string
+}
 
 type waypointProviderModel struct {
 	Host  types.String `tfsdk:"host"`
 	Token types.String `tfsdk:"token"`
 }
 
-// New is a helper function
-func New() provider.Provider {
-	return &waypointProvider{}
+// New creates a new WaypointProvider
+func New(version string) func() provider.Provider {
+	return func() provider.Provider {
+		return &waypointProvider{
+			version: version,
+		}
+	}
 }
 
 // Metadata returns the provider type name.
 func (p *waypointProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
 	resp.TypeName = "waypoint"
+	resp.Version = p.version
 }
 
 // Schema defines the provider-level schema for configuration data.
@@ -126,10 +136,7 @@ func (p *waypointProvider) Configure(ctx context.Context, req provider.Configure
 	}
 
 	ctx = tflog.SetField(ctx, "waypoint_host", host)
-	ctx = tflog.SetField(ctx, "waypoint_token", token)
 	ctx = tflog.MaskFieldValuesWithFieldKeys(ctx, "waypoint_token")
-
-	tflog.Debug(ctx, "Creating waypoint client")
 
 	if token == "" {
 		resp.Diagnostics.AddError(
@@ -139,6 +146,7 @@ func (p *waypointProvider) Configure(ctx context.Context, req provider.Configure
 		return
 	}
 
+	tflog.Debug(ctx, "Creating waypoint client")
 	waypointClientConfig := waypointClient.DefaultConfig()
 	waypointClientConfig.Address = host
 	waypointClientConfig.Token = token
