@@ -52,3 +52,7 @@ gpg:
 	gpg --detach-sign ./bin/terraform-provider-$(name)_$(version)_SHA256SUMS
 release_package: multi_build zip shasum gpg
 
+# Run acceptance tests
+.PHONY: testacc
+testacc:
+	TF_ACC=1 go test ./... -v $(TESTARGS) -timeout 120m
