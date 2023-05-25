@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 resource "waypoint_auth_method_oidc" "okta" {
   name          = "my-oidc"
   display_name  = "My OIDC Provider"

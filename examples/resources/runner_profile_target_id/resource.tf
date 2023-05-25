@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 resource "waypoint_runner_profile" "example" {
   profile_name     = "example"
   oci_url          = "hashicorp/waypoint-odr:latest"

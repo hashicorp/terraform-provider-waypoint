@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 ## Example with runner labels
 resource "waypoint_runner_profile" "target_id" {
   profile_name = "example"
