@@ -2,7 +2,7 @@ package provider
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"os"
 	"testing"
 )
@@ -58,12 +58,6 @@ resource "waypoint_project" "example" {
 `,
 				//ResourceName: "waypoint_project.example",
 				//PreConfig: nil,
-				//Config:                    providerConfig + testAccProjectConfig("../../examples/resources/waypoint_project/resource.tf"),
-				//				Config: providerConfig + `
-				//resource "waypoint_project" "example" {
-				//	project_name           = "example"
-				//	remote_runners_enabled = false
-				//}`,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("waypoint_project.example", "project_name", "example"),
 					resource.TestCheckResourceAttr("waypoint_project.example", "remote_runners_enabled", "true"),
@@ -72,7 +66,7 @@ resource "waypoint_project" "example" {
 					//resource.TestCheckResourceAttr("waypoint_project.example", "project_variables", "__"),
 					//resource.TestCheckResourceAttr("waypoint_project.example", "git_auth_basic", "__"),
 				),
-				Destroy: true,
+				//Destroy: true,
 				//ExpectNonEmptyPlan: true,
 				ExpectError:        nil,
 				PlanOnly:           false,
