@@ -1,6 +1,8 @@
 package provider
 
 import (
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 )
@@ -11,11 +13,7 @@ const (
 	// It is also possible to use environment variables instead,
 	// such as updating the Makefile and running the testing through that tool.
 	providerConfig = `
-provider "waypoint" {
-  host  = "localhost:9701"
-  token = ""
-}
-`
+provider "waypoint" {}`
 )
 
 var (
@@ -27,3 +25,11 @@ var (
 		"waypoint": providerserver.NewProtocol6WithError(New("test")()),
 	}
 )
+
+// not completely needed but following the example set in
+// hashicorp/terraform-provider-scaffolding-framework
+func testAccPreCheck(t *testing.T) {
+	// You can add code here to run prior to any test case execution, for example assertions
+	// about the appropriate environment variables being set are common to see in a pre-check
+	// function.
+}

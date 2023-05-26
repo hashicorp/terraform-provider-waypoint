@@ -36,6 +36,7 @@ type configSourceResource struct {
 
 // configSourceResourceModel maps the data schema data.
 type configSourceResourceModel struct {
+	ID          types.Int64       `tfsdk:"id"`
 	Type        types.String      `tfsdk:"type"`
 	Scope       types.String      `tfsdk:"scope"`
 	Project     types.String      `tfsdk:"project"`
@@ -62,6 +63,10 @@ func (r *configSourceResource) Configure(_ context.Context, req resource.Configu
 func (r *configSourceResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
+			"id": schema.Int64Attribute{
+				Computed:    true,
+				Description: "Unique Hash ID",
+			},
 			"type": schema.StringAttribute{
 				Required:    true,
 				Description: "Config Source type",
@@ -165,6 +170,7 @@ func (r *configSourceResource) Read(ctx context.Context, req resource.ReadReques
 	}
 
 	state.Config = cfg.GetConfig()
+	state.ID = types.Int64Value(int64(cfg.GetHash()))
 
 	// Set refreshed state
 	diags = resp.State.Set(ctx, &state)
@@ -219,10 +225,12 @@ func (r *configSourceResource) upsert(ctx context.Context, plan configSourceReso
 	}
 
 	// Upsert the config source; the method SetConfigSource itself uses upsert
-	err := r.client.SetConfigSource(ctx, sourceConfig)
+	hash, err := r.client.SetConfigSource(ctx, sourceConfig)
 	if err != nil {
 		return plan, err
 	}
+
+	plan.ID = types.Int64Value(int64(hash))
 
 	return plan, nil
 }
