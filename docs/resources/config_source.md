@@ -27,4 +27,8 @@ description: |-
 - `project` (String) Config Source Project
 - `workspace` (String) Config Source Workspace
 
+### Read-Only
+
+- `id` (Number) Unique Hash ID
+
 
