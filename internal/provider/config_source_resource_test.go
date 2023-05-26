@@ -13,7 +13,7 @@ func TestAccConfigSource(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read testing
 			{
-				Config: testAccExampleResourceConfig,
+				Config: providerConfig + testAccExampleResourceConfig,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("waypoint_config_source.vaultbasic", "type", "vault"),
 					resource.TestCheckResourceAttr("waypoint_config_source.vaultbasic", "scope", "global"),

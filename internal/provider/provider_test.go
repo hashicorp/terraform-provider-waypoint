@@ -13,7 +13,9 @@ const (
 	// It is also possible to use environment variables instead,
 	// such as updating the Makefile and running the testing through that tool.
 	providerConfig = `
-provider "waypoint" {}`
+provider "waypoint" {}
+
+`
 )
 
 var (
