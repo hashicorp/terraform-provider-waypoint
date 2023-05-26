@@ -1,6 +1,8 @@
 package provider
 
 import (
+	"fmt"
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -11,7 +13,7 @@ func TestAccProjectResource(t *testing.T) {
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: providerConfig + testAccProjectResourceConfig,
+				Config: HelperTestAccTFExampleConfig("waypoint_project/project.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("waypoint_project.example", "project_name", "example"),
 					resource.TestCheckResourceAttr("waypoint_project.example", "remote_runners_enabled", "true"),
@@ -33,6 +35,22 @@ func TestAccProjectResource(t *testing.T) {
 					resource.TestCheckResourceAttr("waypoint_project.example", "git_auth_basic.%", "2"),
 					resource.TestCheckResourceAttr("waypoint_project.example", "git_auth_basic.username", "catsby"),
 					resource.TestCheckResourceAttr("waypoint_project.example", "git_auth_basic.password", "test"),
+
+					// Example1 from examples directory
+					resource.TestCheckResourceAttr("waypoint_project.example1", "project_name", "example1"),
+					resource.TestCheckResourceAttr("waypoint_project.example1", "remote_runners_enabled", "true"),
+					resource.TestCheckResourceAttr("waypoint_project.example1", "data_source_git.git_url", "https://github.com/hashicorp/waypoint-examples"),
+					resource.TestCheckResourceAttr("waypoint_project.example1", "data_source_git.git_path", "docker/go"),
+					resource.TestCheckResourceAttr("waypoint_project.example1", "data_source_git.git_ref", "HEAD"),
+					resource.TestCheckResourceAttr("waypoint_project.example1", "data_source_git.file_change_signal", "some-signal"),
+					resource.TestCheckResourceAttr("waypoint_project.example1", "data_source_git.git_poll_interval_seconds", "15"),
+					resource.TestCheckResourceAttr("waypoint_project.example1", "app_status_poll_seconds", "12"),
+					resource.TestCheckResourceAttr("waypoint_project.example1", "project_variables.0.name", "devopsrob"),
+					resource.TestCheckResourceAttr("waypoint_project.example1", "project_variables.0.value", "dev-advocate"),
+					resource.TestCheckResourceAttr("waypoint_project.example1", "project_variables.0.sensitive", "false"),
+					resource.TestCheckResourceAttr("waypoint_project.example1", "git_auth_ssh.%", "3"),
+					resource.TestCheckResourceAttr("waypoint_project.example1", "git_auth_ssh.git_user", "cassie"),
+					resource.TestCheckResourceAttr("waypoint_project.example1", "git_auth_ssh.passphrase", "test"),
 				),
 				ExpectError: nil,
 				PlanOnly:    false,
@@ -41,44 +59,14 @@ func TestAccProjectResource(t *testing.T) {
 	})
 }
 
-var testAccProjectResourceConfig = `
-resource "waypoint_project" "example" {
+// HelperTestAccTFExampleConfig is intended for us to more easily pass in just the
+// corresponding resource folder and file
+// Example: HelperTestAccTFExampleConfig("waypoint_project/project.tf")
+func HelperTestAccTFExampleConfig(filename string) string {
+	fileContent, err := os.ReadFile("../../examples/resources/" + filename)
+	if err != nil {
+		fmt.Print(err)
+	}
 
-  project_name           = "example"
-  remote_runners_enabled = true
-
-  data_source_git = {
-    git_url                   = "https://github.com/hashicorp/waypoint-examples"
-    git_path                  = "docker/go"
-    git_ref                   = "HEAD"
-    file_change_signal        = "some-signal"
-    git_poll_interval_seconds = 15
-    # ignore_changes_outside_path = true
-  }
-
-  app_status_poll_seconds = 12
-
-  project_variables = [
-    {
-      name      = "name"
-      value     = "devopsrob"
-      sensitive = true
-    },
-    {
-      name      = "job"
-      value     = "dev-advocate"
-      sensitive = false
-    },
-    {
-      name      = "conference"
-      value     = "HashiConf EU 2022"
-      sensitive = false
-    },
-  ]
-
-  git_auth_basic = {
-    username = "catsby"
-    password = "test"
-  }
+	return string(fileContent)
 }
-`
