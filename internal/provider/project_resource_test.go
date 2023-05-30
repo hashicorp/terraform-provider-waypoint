@@ -11,7 +11,7 @@ func TestAccProjectResource(t *testing.T) {
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: HelperTestAccTFExampleConfig("waypoint_project/project.tf"),
+				Config: HelperTestAccTFExampleConfig("resources/waypoint_project/project.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("waypoint_project.example", "project_name", "example"),
 					resource.TestCheckResourceAttr("waypoint_project.example", "remote_runners_enabled", "true"),

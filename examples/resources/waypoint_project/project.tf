@@ -7,11 +7,7 @@ terraform {
   }
 }
 
-provider "waypoint" {
-  host  = "localhost:9701"
-  # output from `waypoint user token`
-  token = ""
-}
+provider "waypoint" {}
 
 resource "waypoint_project" "example" {
 
