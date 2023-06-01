@@ -1,17 +1,22 @@
 package provider
 
 import (
+	"github.com/stretchr/testify/require"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func TestAccProjectResource(t *testing.T) {
+	require := require.New(t)
+	tfConfig, err := helperTestAccTFExampleConfig("resources/waypoint_project/resource.tf")
+	require.NoError(err)
+
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: HelperTestAccTFExampleConfig("resources/waypoint_project/project.tf"),
+				Config: tfConfig,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("waypoint_project.example", "project_name", "example"),
 					resource.TestCheckResourceAttr("waypoint_project.example", "remote_runners_enabled", "true"),
