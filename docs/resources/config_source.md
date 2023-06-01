@@ -14,8 +14,8 @@ description: |-
 
 ```terraform
 resource "waypoint_config_source" "globalvault" {
-  type        = "globalvault"
-  scope       = "global"
+  type  = "globalvault"
+  scope = "global"
   config = {
     addr           = "https://localhost:8200"
     skip_verify    = true
