@@ -8,7 +8,9 @@ terraform {
 }
 
 provider "waypoint" {
-  host  = "localhost:9701"
+  # if running locally: localhost:9701
+  host = ""
+  # output from `waypoint user token`
   token = ""
 }
 

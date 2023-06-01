@@ -30,7 +30,6 @@ provider "waypoint" {
 }
 
 resource "waypoint_project" "example" {
-
   project_name           = "example"
   remote_runners_enabled = true
 

@@ -13,6 +13,7 @@ func TestAccProjectResource(t *testing.T) {
 	require.NoError(err)
 
 	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
