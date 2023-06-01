@@ -13,7 +13,7 @@ description: |-
 ## Example Usage
 
 ```terraform
-resource "waypoint_auth_method_oidc" "okta" {
+resource "waypoint_auth_method" "okta" {
   name          = "my-oidc"
   display_name  = "My OIDC Provider"
   client_id     = "..."
