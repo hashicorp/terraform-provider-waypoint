@@ -28,10 +28,13 @@ terraform {
 }
 
 provider "waypoint" {
-  # if running locally: localhost:9701
-  host = ""
-  # output from `waypoint user token`
-  token = ""
+  # if running locally: localhost:9701, 
+  # or use WAYPOINT_HOST environment variable 
+  # host = ""
+  
+  # output from `waypoint user token`, 
+  # or use WAYPOINT_TOKEN environment variable 
+  # token = ""
 }
 ```
 
