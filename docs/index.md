@@ -16,7 +16,7 @@ description: |-
 terraform {
   required_providers {
     waypoint = {
-      source  = "hashicorp/waypoint"
+      source = "hashicorp/waypoint"
       # version = ""
       # latest version by default
       # see the following resources for more information on specific versions:
