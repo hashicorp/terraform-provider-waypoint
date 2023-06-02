@@ -7,18 +7,13 @@ import (
 )
 
 func TestAccConfigSource(t *testing.T) {
-	tfConfig, err := helperTestAccTFExampleConfig("resources/waypoint_config_source/resource.tf")
-	if err != nil {
-		t.Errorf("error reading config from file: %s", err)
-	}
-
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read testing
 			{
-				Config: tfConfig,
+				Config: helperTestAccTFExampleConfig(t, "resources/waypoint_config_source/resource.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					// Example #1: global scoped
 					resource.TestCheckResourceAttr("waypoint_config_source.globalvault", "type", "globalvault"),

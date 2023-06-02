@@ -7,17 +7,12 @@ import (
 )
 
 func TestAccProjectResource(t *testing.T) {
-	tfConfig, err := helperTestAccTFExampleConfig("resources/waypoint_project/resource.tf")
-	if err != nil {
-		t.Errorf("error reading config from file: %s", err)
-	}
-
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: tfConfig,
+				Config: helperTestAccTFExampleConfig(t, "resources/waypoint_project/resource.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("waypoint_project.example", "project_name", "example"),
 					resource.TestCheckResourceAttr("waypoint_project.example", "remote_runners_enabled", "true"),
