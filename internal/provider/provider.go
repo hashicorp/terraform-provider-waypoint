@@ -103,11 +103,11 @@ func (p *waypointProvider) Configure(ctx context.Context, req provider.Configure
 	host := os.Getenv("WAYPOINT_HOST")
 	token := os.Getenv("WAYPOINT_TOKEN")
 
-	if !config.Host.IsNull() {
+	if host == "" {
 		host = config.Host.ValueString()
 	}
 
-	if !config.Token.IsNull() {
+	if token == "" {
 		token = config.Token.ValueString()
 	}
 

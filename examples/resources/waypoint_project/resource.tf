@@ -1,32 +1,49 @@
 resource "waypoint_project" "example" {
-
   project_name           = "example"
-  remote_runners_enabled = false
+  remote_runners_enabled = true
 
-  data_source_git {
+  data_source_git = {
     git_url                   = "https://github.com/hashicorp/waypoint-examples"
     git_path                  = "docker/go"
     git_ref                   = "HEAD"
     file_change_signal        = "some-signal"
     git_poll_interval_seconds = 15
+    # ignore_changes_outside_path = true
   }
 
   app_status_poll_seconds = 12
 
-  project_variables = {
-    name       = "devopsrob"
-    job        = "dev-advocate"
-    conference = "HashiConf EU 2022"
+  project_variables = [
+    {
+      name      = "name"
+      value     = "devopsrob"
+      sensitive = true
+    },
+    {
+      name      = "job"
+      value     = "dev-advocate"
+      sensitive = false
+    },
+    {
+      name      = "conference"
+      value     = "HashiConf EU 2022"
+      sensitive = false
+    },
+  ]
+
+  git_auth_basic = {
+    username = "catsby"
+    password = "test"
   }
 }
 
 ##Git auth ssh example
-resource "waypoint_project" "example" {
+resource "waypoint_project" "example1" {
 
-  project_name           = "example"
+  project_name           = "example1"
   remote_runners_enabled = true
 
-  data_source_git {
+  data_source_git = {
     git_url                   = "https://github.com/hashicorp/waypoint-examples"
     git_path                  = "docker/go"
     git_ref                   = "HEAD"
@@ -36,16 +53,17 @@ resource "waypoint_project" "example" {
 
   app_status_poll_seconds = 12
 
-  project_variables = {
-    name       = "devopsrob"
-    job        = "dev-advocate"
-    conference = "HashiConf EU 2022"
-  }
+  project_variables = [
+    {
+      name      = "devopsrob"
+      value     = "dev-advocate"
+      sensitive = "false"
+    },
+  ]
 
-
-  git_auth_ssh {
-    git_user        = "devops-rob"
-    passphrase      = "test-password"
+  git_auth_ssh = {
+    git_user        = "cassie"
+    passphrase      = "test"
     ssh_private_key = <<EOF
 -----BEGIN RSA PRIVATE KEY-----
 MIICXAIBAAKBgQCjcGqTkOq0CR3rTx0ZSQSIdTrDrFAYl29611xN8aVgMQIWtDB/

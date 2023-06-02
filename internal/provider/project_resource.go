@@ -39,6 +39,7 @@ type projectResource struct {
 
 // projectResourceModel maps the resource schema data.
 type projectResourceModel struct {
+	ID                   types.String      `tfsdk:"id"`
 	Name                 types.String      `tfsdk:"project_name"`
 	Variables            []*variablesModel `tfsdk:"project_variables"`
 	RemoteRunnersEnabled types.Bool        `tfsdk:"remote_runners_enabled"`
@@ -92,6 +93,10 @@ func (r *projectResource) Configure(_ context.Context, req resource.ConfigureReq
 func (r *projectResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
+			"id": schema.StringAttribute{
+				Computed:    true,
+				Description: "The id required for acceptance testing to work",
+			},
 			"project_name": schema.StringAttribute{
 				Required:    true,
 				Description: "The name of the Waypoint project",
@@ -258,6 +263,8 @@ func (r *projectResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
+	//re-add the ID here so response has it
+	state.ID = types.StringValue(project.Name) //name is the best we can do for now
 	state.RemoteRunnersEnabled = types.BoolValue(project.RemoteEnabled)
 
 	var projectVariables []*variablesModel
@@ -446,6 +453,7 @@ func (r *projectResource) upsert(ctx context.Context, plan projectResourceModel)
 	projectConf.GitPollInterval = time.Duration(plan.DataSourceGit.PollInterval.ValueInt64()) * time.Second
 
 	projectConf.FileChangeSignal = plan.DataSourceGit.FileChangeSignal.ValueString()
-	_, err := r.client.UpsertProject(ctx, projectConf, &gitConfig, variableList)
+	proj, err := r.client.UpsertProject(ctx, projectConf, &gitConfig, variableList)
+	plan.ID = types.StringValue(proj.Name)
 	return plan, err
 }
