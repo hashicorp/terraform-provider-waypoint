@@ -39,14 +39,21 @@ terraform {
   required_providers {
     waypoint = {
       source  = "local/hashicorp/waypoint"
-      version = "0.1.0"
+      # version = ""
+      # latest version by default
+      # see the following resources for more information on specific versions:
+      # https://github.com/hashicorp/terraform-provider-waypoint/blob/main/CHANGELOG.md
+      # https://releases.hashicorp.com/
+      # https://github.com/hashicorp/terraform-provider-waypoint/releases
     }
   }
 }
 
 provider "waypoint" {
-  waypoint_addr = "localhost:9701"
-  token         = "..."
+  # if running locally: localhost:9701
+  host = ""
+  # output from `waypoint user token`
+  token = ""
 }
 
 resource "waypoint_project" "example" {
@@ -76,6 +83,8 @@ resource "waypoint_project" "example" {
   }
 }
 ```
+NOTE: `WAYPOINT_HOST` and `WAYPOINT_TOKEN` may be set as environment variables, and will override the provider host/token set in your terraform configuration.
+
 
 ## Developing the Provider
 

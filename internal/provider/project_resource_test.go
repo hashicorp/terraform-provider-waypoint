@@ -1,18 +1,19 @@
 package provider
 
 import (
-	"github.com/stretchr/testify/require"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func TestAccProjectResource(t *testing.T) {
-	require := require.New(t)
 	tfConfig, err := helperTestAccTFExampleConfig("resources/waypoint_project/resource.tf")
-	require.NoError(err)
+	if err != nil {
+		t.Errorf("error reading config from file: %s", err)
+	}
 
 	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{

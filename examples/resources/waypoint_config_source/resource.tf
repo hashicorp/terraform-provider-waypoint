@@ -1,3 +1,4 @@
+## Example #1: global scoped
 resource "waypoint_config_source" "globalvault" {
   type  = "globalvault"
   scope = "global"
@@ -8,6 +9,7 @@ resource "waypoint_config_source" "globalvault" {
   }
 }
 
+## Example #2: project scoped
 resource "waypoint_config_source" "projectvault" {
   type        = "vault"
   scope       = "project"

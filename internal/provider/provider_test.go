@@ -7,17 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 )
 
-const (
-	// providerConfig is a shared configuration to combine with the actual
-	// test configuration so the client is properly configured.
-	// It is also possible to use environment variables instead,
-	// such as updating the Makefile and running the testing through that tool.
-	providerConfig = `
-provider "waypoint" {}
-
-`
-)
-
 var (
 	// testAccProtoV6ProviderFactories are used to instantiate a provider during
 	// acceptance testing. The factory function will be invoked for every Terraform
