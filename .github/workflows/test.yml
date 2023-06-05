@@ -57,9 +57,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # list whatever Terraform versions here you would like to support
+        # List whatever Terraform versions here you would like to support. We
+        # only test the latest versions right now. Updates to randomizing
+        # resources names will be needed to support multiple versions of
+        # Terraform for testing.
         terraform:
-          - '1.3.*'
           - '1.4.*'
     steps:
       - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
