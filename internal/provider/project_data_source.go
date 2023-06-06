@@ -240,8 +240,11 @@ func (d *projectDataSource) Read(ctx context.Context, req datasource.ReadRequest
 		default:
 			// assumes *gen.Job_DataSource_Git
 			src := project.DataSource.Source.(*gen.Job_DataSource_Git)
-			pollRaw, _ := time.ParseDuration(project.DataSourcePoll.Interval)
-			poll := pollRaw / time.Second
+			var poll int64
+			if project.DataSourcePoll != nil {
+				pollRaw, _ := time.ParseDuration(project.DataSourcePoll.Interval)
+				poll = int64(pollRaw / time.Second)
+			}
 			dsg = &dataSourceGitModel{
 				Url:                      types.StringValue(src.Git.Url),
 				Ref:                      types.StringValue(src.Git.Ref),
