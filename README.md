@@ -38,8 +38,8 @@ Then commit the changes to `go.mod` and `go.sum`.
 terraform {
   required_providers {
     waypoint = {
-      source  = "local/hashicorp/waypoint"
-      # version = ""
+      source  = "hashicorp/waypoint"
+      version = "0.1.0"
       # latest version by default
       # see the following resources for more information on specific versions:
       # https://github.com/hashicorp/terraform-provider-waypoint/blob/main/CHANGELOG.md
