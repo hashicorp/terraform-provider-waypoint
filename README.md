@@ -2,7 +2,7 @@
 
 # Terraform Provider Waypoint
 
-Available in the [Terraform Registry.]()
+Available in the [Terraform Registry](https://registry.terraform.io/providers/hashicorp/waypoint/latest).
 
 ## Requirements
 
