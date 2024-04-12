@@ -1,5 +1,11 @@
 ![Boundary Logo](Waypoint_PrimaryLogo_Color_RGB.png)
 
+*DEPRECATED* Please use the official [HashiCorp Cloud Platform (HCP) Provider](https://registry.terraform.io/providers/hashicorp/hcp/latest/docs) instead.
+
+This provider is deprecated and will no longer be maintained. It originally
+supported the [Waypoint Community Edition](https://github.com/hashicorp/waypoint),
+which has been replaced by the HashiCorp Cloud Platform (HCP) Waypoint service.
+
 # Terraform Provider Waypoint
 
 Available in the [Terraform Registry.](https://registry.terraform.io/providers/hashicorp/waypoint)
